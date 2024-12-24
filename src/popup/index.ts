@@ -27,5 +27,3 @@ bt_clear_storage?.addEventListener('click', async () => {
   const res = await clear_storage()
   console.log('clear_storage', res);
 })
-
-export { }

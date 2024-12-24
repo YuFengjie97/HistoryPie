@@ -4,8 +4,8 @@ import path from 'path'
 export default defineConfig({
   build: {
     outDir: 'dist',
-    watch: {},
-    // sourcemap: true,
+    // watch: {},
+    sourcemap: true,
     minify: false,
     rollupOptions: {
       input: {

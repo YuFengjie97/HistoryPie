@@ -1,12 +1,12 @@
 import * as echarts from 'echarts';
-import { get_storage } from '../api';
-import { TabLifeStorage } from '../background/utils';
+import { getStorage } from '../api';
+import { HostLifeStorage } from '../background/utils';
 // import { PieChart } from 'echarts/charts';
 // import { TooltipComponent } from 'echarts/components';
 // import { CanvasRenderer } from 'echarts/renderers';
 // echarts.use([PieChart, TooltipComponent, CanvasRenderer])
 
-function time_format(secs: number) {
+function timeFormat(secs: number) {
   // 小于一分钟
   if (secs < 60) return `${secs.toFixed(0)} seconds`
   // 小于一小时
@@ -20,9 +20,9 @@ function time_format(secs: number) {
 
 (async () => {
 
-  const res = await get_storage()
-  const data = (Object.entries(res.data) as [string, TabLifeStorage][]).map(([hostname, info]) => {
-    return { name: hostname, value: info.total_seconds }
+  const res = await getStorage()
+  const data = (Object.entries(res.data) as [string, HostLifeStorage][]).map(([hostname, info]) => {
+    return { name: hostname, value: info.totalSeconds }
   }).sort((a, b) => {
     return b.value - a.value
   }).slice(0, 10)
@@ -37,7 +37,7 @@ function time_format(secs: number) {
     tooltip: {
       trigger: 'item',
       formatter: function (params: { name: string, value: number }) {
-        return `${params.name}</br>${time_format(params.value)}`;
+        return `${params.name}</br>${timeFormat(params.value)}`;
       }
     },
     legend: {

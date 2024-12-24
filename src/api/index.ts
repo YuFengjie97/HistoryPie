@@ -1,11 +1,11 @@
-import { TabLife } from "../background/utils";
+import { HostLife } from "../background/utils";
 
 export interface Message {
   type: string,
   preload?: any
 }
 
-export function send_message(message: Message): Promise<{ data: TabLife }> {
+export function sendMessage(message: Message): Promise<{ data: HostLife }> {
   return new Promise((resolve, reject) => {
     chrome.runtime.sendMessage(message, (res: any) => {
       if (chrome.runtime.lastError) {
@@ -20,14 +20,14 @@ export function send_message(message: Message): Promise<{ data: TabLife }> {
 }
 
 
-export function get_host_map() {
-  return send_message({ type: 'get_host_map' })
+export function getHostMap() {
+  return sendMessage({ type: 'getHostMap' })
 }
 
-export function get_storage()  {
-  return send_message({ type: 'get_storage' })
+export function getStorage()  {
+  return sendMessage({ type: 'getStorage' })
 }
 
-export function clear_storage() {
-  return send_message({ type: 'clear_storage' })
+export function clearStorage() {
+  return sendMessage({ type: 'clearStorage' })
 }

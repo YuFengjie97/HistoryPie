@@ -1,45 +1,39 @@
-import { clear_storage, get_storage_all, get_url_info, TabLife } from "./utils";
+import { clearStorage, getStorageAll, getUrlInfo, HostLife } from "./utils";
 import { type Message } from '../api/index'
 
 
 type HostName = string
-type TabId = number
-
-// tabId --> hostname --> TabLife
-const tab_map: {
-  [tabId in number]: HostName
-} = {}
 
 const host_map: {
-  [hostname in HostName]: TabLife
+  [hostname in HostName]: HostLife
 } = {}
 
-let tab_active = 0
+let host_active = 0
 
 /**
  * 标签页激活
  * 触发条件:
  * 1. 新建空白页
- * 2. 从历史记录/url直接打开 https://www.bilibili.com
+ * 2. 从历史记录/url直接打开
  */
 chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   console.log('tab Active  ');
   const now = new Date().getTime()
-  const { hostname } = await get_url_info()
+  const { hostname } = await getUrlInfo()
 
   // 更新旧标签
-  host_map[tab_map[tab_active]]?.update_last_time(now)
+  host_map[tabMap[tabActive]]?.updateLastTime(now)
   
   // 特殊网站不用记录
   if(hostname === null) return
-  if (!tab_map[tabId]) {
+  if (!tabMap[tabId]) {
     // 新开标签页
-    tab_map[tabId] = hostname
-    host_map[hostname] = new TabLife(tabId, hostname, now)
+    tabMap[tabId] = hostname
+    host_map[hostname] = new HostLife(tabId, hostname, now)
   }else{
     // 已有标签页更新
-    tab_active = tabId
-    host_map[tab_map[tabId]]?.update_last_time(now)
+    tabActive = tabId
+    host_map[tabMap[tabId]]?.updateLastTime(now)
   }
 });
 
@@ -53,14 +47,14 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
 chrome.tabs.onRemoved.addListener(async (tabId) => {
   console.log('tab Remove  ');
 
-  const hostname = tab_map[tabId]
+  const hostname = tabMap[tabId]
   if(!hostname) return
 
   const now = new Date().getTime()
 
-  host_map[hostname]?.update_last_time(now)
+  host_map[hostname]?.updateLastTime(now)
 
-  delete tab_map[tabId]
+  delete tabMap[tabId]
 });
 
 /**
@@ -72,14 +66,14 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete') {
     console.log('tab Update  ');
 
-    const { hostname } = await get_url_info()
+    const { hostname } = await getUrlInfo()
     const now = new Date().getTime()
     if (hostname === null || hostname === 'newtab') return
 
     if (!host_map[hostname]) {
-      host_map[hostname] = new TabLife(tabId, hostname, now)
+      host_map[hostname] = new HostLife(tabId, hostname, now)
     } else {
-      host_map[hostname].update_last_time(now)
+      host_map[hostname].updateLastTime(now)
     }
   }
 });
@@ -90,18 +84,18 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
  * sendResponse ts 参数bug  https://github.com/GoogleChrome/chrome-types/issues/50
  */
 chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse) => {
-  if (message.type === 'get_host_map') {
+  if (message.type === 'getHostMap') {
     sendResponse({ data: host_map })
   }
 
-  if (message.type === "get_storage") {
-    get_storage_all().then(res => {
+  if (message.type === "getStorage") {
+    getStorageAll().then(res => {
       sendResponse({ data: res })
     })
   }
 
-  if (message.type === "clear_storage") {
-    clear_storage().then(res => {
+  if (message.type === "clearStorage") {
+    clearStorage().then(res => {
       sendResponse({ data: "success" })
     })
   }

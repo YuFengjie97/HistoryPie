@@ -2,12 +2,15 @@ import * as echarts from 'echarts';
 import { get_storage } from '../api';
 import { TabLifeStorage } from '../background/utils';
 
+
 (async () => {
 
   const res = await get_storage()
   const data = (Object.entries(res.data) as [string, TabLifeStorage][]).map(([hostname, info]) => {
     return { name: hostname, value: parseFloat(info.total_seconds.toFixed(2)) }
-  })
+  }).sort((a, b) => {
+    return b.value - a.value
+  }).slice(0, 10)
   console.log(data);
 
   const myChart = echarts.init(document.getElementById('chart1'));

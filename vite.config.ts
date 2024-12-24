@@ -5,8 +5,8 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     // watch: {},
-    sourcemap: true,
-    minify: false,
+    sourcemap: false,
+    minify: true,
     rollupOptions: {
       input: {
         background: path.resolve(__dirname, 'src/background/index.ts'),

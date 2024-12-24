@@ -5,22 +5,21 @@ export interface TabLifeStorage {
 }
 
 export class TabLife {
+  tab_id: number
   hostname: string
-  start_time: number
   last_time: number
-  total_seconds = 0
 
-  constructor(hostname: string, start_time: number) {
+  constructor(tab_id: number, hostname: string, last_time: number) {
+    this.tab_id = tab_id
     this.hostname = hostname
-    this.start_time = start_time
-    this.last_time = start_time
+    this.last_time = last_time
   }
 
   async update_last_time(time: number) {
+    const milliseconds = time - this.last_time
     this.last_time = time
-    const milliseconds = this.last_time - this.start_time
-    this.total_seconds = milliseconds_to_seconds(milliseconds)
-    await this.update_storage()
+    const seconds = milliseconds_to_seconds(milliseconds)
+    await this.update_storage(seconds)
   }
 
   async get_storage_total_seconds(): Promise<number> {
@@ -32,9 +31,11 @@ export class TabLife {
     return total_seconds
   }
 
-  async update_storage() {
-    const seconds = await this.get_storage_total_seconds()
-    const seconds_update = seconds + this.total_seconds
+  async update_storage(seconds: number) {
+    const seconds_exits = await this.get_storage_total_seconds()
+    const seconds_update = seconds_exits + seconds
+    console.log([seconds_exits, seconds]);
+    
     storage_set<TabLifeStorage>(this.hostname, {
       hostname: this.hostname,
       last_time: this.last_time,
@@ -54,7 +55,7 @@ async function storage_set<T>(key: string, val: T) {
  * @param key 未传入,undefined: 返回所有storage
  * @param key string: 返回指定hostname的storage,如果没有,返回null
  */
-function storage_get<T>(): Promise<{[k in string]: TabLife}>
+function storage_get<T>(): Promise<{ [k in string]: TabLife }>
 function storage_get<T>(key: string): Promise<T | null>
 async function storage_get<T>(key?: string): Promise<T | null | { [k in string]: T }> {
   return new Promise((resolve, reject) => {
@@ -90,17 +91,21 @@ export function milliseconds_to_seconds(milliseconds: number) {
 }
 
 
-export function parse_hostname(url: string): string {
+export function parse_hostname(url: string): string | null {
   try {
-    const hostname = new URL(url).hostname
+    const { protocol, hostname } = new URL(url)
+
+    // 只收集http协议的网站
+    if (!['https:', 'http'].includes(protocol)) return null
+
     return hostname
   } catch (e) {
-    return ''
+    return null
   }
 }
 
 export function get_url_info(): Promise<{
-  hostname: string
+  hostname: string | null
   url: string,
 }> {
   return new Promise((resolve, reject) => {

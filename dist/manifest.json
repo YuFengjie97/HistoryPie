@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "History Pie",
+  "version": "1.0",
+  "description": "Collect the time spent browsing the site and graph it for you to see for yourself. The data will be stored entirely locally and will not be uploaded.",
+  "action": {
+    "default_popup": "html/popup.html"
+  },
+  "icons": {
+    "16": "images/icon_pie_16.png",
+    "32": "images/icon_pie_32.png",
+    "48": "images/icon_pie_48.png",
+    "128": "images/icon_pie_128.png"
+  },
+  "content_scripts": [
+    {
+      "js": ["content.js"],
+      "matches": [
+        "<all_urls>",
+        "https://developer.chrome.com/docs/extensions/*",
+        "https://developer.chrome.com/docs/webstore/*"
+      ]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": ["tabs","storage", "activeTab", "scripting"],
+  "web_accessible_resources": [
+    {
+      "resources": ["html/chart.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

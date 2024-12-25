@@ -1,6 +1,7 @@
 import * as echarts from 'echarts';
 import { getStorage } from '../api';
 import { HostLifeStorage } from '../background/utils';
+import { i18n } from '../utils';
 // import { PieChart } from 'echarts/charts';
 // import { TooltipComponent } from 'echarts/components';
 // import { CanvasRenderer } from 'echarts/renderers';
@@ -31,7 +32,7 @@ function timeFormat(secs: number) {
   const myChart = echarts.init(document.getElementById('chart1'));
   myChart.setOption({
     title: {
-      text: 'Browse Time',
+      text: i18n('app_name'),
       left: 'center'
     },
     tooltip: {

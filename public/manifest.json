@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "History Pie",
+  "name": "__MSG_app_name__",
   "version": "1.0",
-  "description": "Collect the time spent browsing the site and graph it for you to see for yourself. The data will be stored entirely locally and will not be uploaded.",
+  "description": "__MSG_app_description__",
   "action": {
     "default_popup": "html/popup.html"
   },
@@ -16,9 +16,7 @@
     {
       "js": ["content.js"],
       "matches": [
-        "<all_urls>",
-        "https://developer.chrome.com/docs/extensions/*",
-        "https://developer.chrome.com/docs/webstore/*"
+        "<all_urls>"
       ]
     }
   ],
@@ -32,5 +30,6 @@
       "resources": ["html/chart.html"],
       "matches": ["<all_urls>"]
     }
-  ]
+  ],
+  "default_locale": "en"
 }

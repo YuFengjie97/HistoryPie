@@ -4,11 +4,32 @@ import { type Message } from '../api/index'
 
 type HostName = string
 
-const host_map: {
+const hostMap: {
   [hostname in HostName]: HostLife
 } = {}
 
-let host_active = 0
+let hostCurrent: HostName | null = null
+
+/**
+ * 在激活/更新tab,时,在当前tab/新tab跳转页面(跳转相同hostname/不同)
+ */
+async function updateHostLife() {
+  // 旧地址更新
+  hostCurrent && hostMap[hostCurrent]?.handleLeave()
+
+  // 新地址更新 / 创建
+  const { hostname } = await getUrlInfo()
+  if (hostname !== null) {
+    if (!hostMap[hostname]) {
+      hostMap[hostname] = new HostLife(hostname)
+    } else {
+      hostMap[hostname].handleEnter()
+    }
+  }
+
+  // 特殊网站也要记录
+  hostCurrent = hostname
+}
 
 /**
  * 标签页激活
@@ -18,23 +39,7 @@ let host_active = 0
  */
 chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   console.log('tab Active  ');
-  const now = new Date().getTime()
-  const { hostname } = await getUrlInfo()
-
-  // 更新旧标签
-  host_map[tabMap[tabActive]]?.updateLastTime(now)
-  
-  // 特殊网站不用记录
-  if(hostname === null) return
-  if (!tabMap[tabId]) {
-    // 新开标签页
-    tabMap[tabId] = hostname
-    host_map[hostname] = new HostLife(tabId, hostname, now)
-  }else{
-    // 已有标签页更新
-    tabActive = tabId
-    host_map[tabMap[tabId]]?.updateLastTime(now)
-  }
+  await updateHostLife()
 });
 
 
@@ -47,14 +52,8 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
 chrome.tabs.onRemoved.addListener(async (tabId) => {
   console.log('tab Remove  ');
 
-  const hostname = tabMap[tabId]
-  if(!hostname) return
-
-  const now = new Date().getTime()
-
-  host_map[hostname]?.updateLastTime(now)
-
-  delete tabMap[tabId]
+  const { hostname } = await getUrlInfo()
+  hostname && hostMap[hostname]?.handleLeave()
 });
 
 /**
@@ -66,26 +65,15 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete') {
     console.log('tab Update  ');
 
-    const { hostname } = await getUrlInfo()
-    const now = new Date().getTime()
-    if (hostname === null || hostname === 'newtab') return
-
-    if (!host_map[hostname]) {
-      host_map[hostname] = new HostLife(tabId, hostname, now)
-    } else {
-      host_map[hostname].updateLastTime(now)
-    }
+    await updateHostLife()
   }
 });
 
 
 // 通信
-/**
- * sendResponse ts 参数bug  https://github.com/GoogleChrome/chrome-types/issues/50
- */
 chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse) => {
   if (message.type === 'getHostMap') {
-    sendResponse({ data: host_map })
+    sendResponse({ data: hostMap })
   }
 
   if (message.type === "getStorage") {

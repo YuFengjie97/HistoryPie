@@ -8,7 +8,7 @@ import { HostLifeStorage } from '../background/utils';
 
 function timeFormat(secs: number) {
   // 小于一分钟
-  if (secs < 60) return `${secs.toFixed(0)} seconds`
+  if (secs < 60) return `${secs.toFixed(1)} seconds`
   // 小于一小时
   if (secs < 60 * 60) return `${(secs / 60).toFixed(1)} minutes`
   // 小于一天

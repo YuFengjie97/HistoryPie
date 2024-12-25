@@ -8,10 +8,10 @@ btGoChart?.addEventListener('click', () => {
   });
 })
 
-const btLogHostMap = document.querySelector('#log_host_map')
+const btLogHostMap = document.querySelector('#log_hostMap')
 btLogHostMap?.addEventListener('click', async () => {
   const res = await getHostMap()
-  console.log('host_map', res);
+  console.log('hostMap', res);
 })
 
 

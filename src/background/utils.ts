@@ -6,34 +6,44 @@ export interface HostLifeStorage {
 
 export class HostLife {
   hostname: string
-  lastTime: number
+  // 在一次访问中(处于当前正在活跃的标签页时)的起始时间和结束时间
+  enterTime: number
+  leaveTime: number = 0
+  // 上次最后一次访问
+  lastTime: number = 0
 
-  constructor(hostname: string, lastTime: number) {
+  constructor(hostname: string) {
+    const now = new Date().getTime()
     this.hostname = hostname
-    this.lastTime = lastTime
+    this.enterTime = now
   }
 
-  async updateLastTime(time: number) {
-    const milliseconds = time - this.lastTime
-    this.lastTime = time
+  async handleEnter() {
+    const now = new Date().getTime()
+    this.enterTime = now
+  }
+
+  async handleLeave() {
+    const now = new Date().getTime()
+    this.lastTime = now
+    const milliseconds = this.lastTime - this.enterTime
     const seconds = millisecondsToSeconds(milliseconds)
     await this.updateStorage(seconds)
   }
 
   async getStorageTotalSeconds(): Promise<number> {
-    const tabLife = await storageGet<HostLifeStorage>(this.hostname)
-    if (tabLife === null) {
+    const HostLife = await storageGet<HostLifeStorage>(this.hostname)
+    if (HostLife === null) {
       return 0
     }
-    const { totalSeconds } = tabLife
+    const { totalSeconds } = HostLife
     return totalSeconds
   }
 
   async updateStorage(seconds: number) {
-    const secondsExits = await this.getStorageTotalSeconds()
-    const secondsUpdate = secondsExits + seconds
-    console.log([secondsExits, seconds]);
-    
+    const secondsSave = await this.getStorageTotalSeconds()
+    const secondsUpdate = secondsSave + seconds
+
     storageSet<HostLifeStorage>(this.hostname, {
       hostname: this.hostname,
       lastTime: this.lastTime,

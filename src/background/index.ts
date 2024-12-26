@@ -38,7 +38,7 @@ async function updateHostLife() {
  * 2. 从历史记录/url直接打开
  */
 chrome.tabs.onActivated.addListener(async ({ tabId }) => {
-  console.log('tab Active  ');
+  console.log('tab Active   ');
   await updateHostLife()
 });
 

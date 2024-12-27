@@ -4,6 +4,11 @@ import { getHostMap, getStorage, clearStorage } from '../api/index'
 
 const msg = ref('dddhello')
 
+console.log('-------------------------------------');
+console.log('---------this is popup---------------');
+console.log('-------------------------------------');
+
+
 function handleGoChart() {
   const url = chrome.runtime.getURL(`dist/chart/index.html`);
   chrome.tabs.create({ url }, (tab) => {

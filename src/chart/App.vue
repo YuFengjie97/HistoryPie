@@ -5,7 +5,14 @@ import { getStorage } from '../api';
 import { HostLifeStorage } from '../background/utils';
 import { i18n } from '../utils/locales';
 
+
+console.log('-------------------------------------');
+console.log('---------this is chart---------------');
+console.log('-------------------------------------');
+
 const chart = ref<HTMLElement>()
+console.log(chart.value);
+
 
 
 function timeFormat(secs: number) {
@@ -70,5 +77,7 @@ onMounted(async() => {
 </template>
 
 <style lang='less' scoped>
-
+.chart{
+  height: 400px;
+}
 </style>

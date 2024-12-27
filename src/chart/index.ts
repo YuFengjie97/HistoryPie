@@ -1,7 +1,7 @@
 import * as echarts from 'echarts';
 import { getStorage } from '../api';
 import { HostLifeStorage } from '../background/utils';
-import { i18n } from '../utils';
+import { i18n } from '../utils/locales';
 // import { PieChart } from 'echarts/charts';
 // import { TooltipComponent } from 'echarts/components';
 // import { CanvasRenderer } from 'echarts/renderers';

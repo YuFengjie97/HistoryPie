@@ -1,18 +1,17 @@
 import { defineConfig } from 'vite';
-import { resolve } from 'path'
-import { isDev } from './scripts/utils';
+import { isDev, r } from './scripts/utils';
 
 export default defineConfig({
   build: {
     watch: isDev
       ? {}
       : undefined,
-    outDir: resolve(__dirname, './dist/background'),
+    outDir: r('extension/dist/background'),
     cssCodeSplit: false,
     emptyOutDir: false,
     sourcemap: isDev ? 'inline' : false,
     lib: {
-      entry: resolve(__dirname, './src/background/index.ts'),
+      entry: r('src/background/index.ts'),
       name: "background",
       formats: ['iife'],
     },

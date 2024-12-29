@@ -1,6 +1,7 @@
 import fs from 'fs-extra'
 import chokidar from 'chokidar'
 import { r, port,isDev } from './utils'
+import { execSync } from 'node:child_process'
 
 
 /**
@@ -18,6 +19,10 @@ async function stubIndexHtml() {
     await fs.writeFile(r(`extension/dist/${view}/index.html`), data, 'utf-8')
   }
 }
+
+
+//  write mainfest.json
+execSync('npx tsx ./scripts/manifest.ts', { stdio: 'inherit' })
 
 
 if (isDev) {

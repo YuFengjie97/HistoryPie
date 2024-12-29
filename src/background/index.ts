@@ -1,10 +1,6 @@
 import { clearStorage, getStorageAll, getUrlInfo, HostLife } from "./utils";
 import { type Message } from '../api/index'
 
-console.log('-------------------------------------');
-console.log('---------this is background----------');
-console.log('-------------------------------------');
-
 
 type HostName = string
 

@@ -21,12 +21,14 @@ export class HostLife {
   async handleEnter() {
     const now = new Date().getTime()
     this.enterTime = now
+    this.lastTime = this.enterTime
   }
 
   async handleLeave() {
     const now = new Date().getTime()
+    this.leaveTime = now
     this.lastTime = now
-    const milliseconds = this.lastTime - this.enterTime
+    const milliseconds = this.leaveTime - this.enterTime
     const seconds = millisecondsToSeconds(milliseconds)
     await this.updateStorage(seconds)
   }

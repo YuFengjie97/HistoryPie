@@ -26,3 +26,4 @@
 - js入口打包build.lib的方式,但是在rollupOptions.ouput.extend为true,这是因为umd/iffe的方式允许模块扩展全局变量,如果为false,会有对全局变量修改的隐患
 - background编译为index.mjs  mjs会告诉浏览器我是使用es模块规范的js文件.在明确使用<script type="module"/>时,浏览器对待mjs/js都会将其作为模块使用
 - content编译为index.global.js  global只有语义的"全局(content作为页面注入脚本,意为全局)",没有实际作用.
+- `git rm -r --cached .`

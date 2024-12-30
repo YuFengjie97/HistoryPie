@@ -1,7 +1,13 @@
-export interface HostLifeStorage {
+export * from './index'
+
+export type HostLifeStorage = {
   hostname: string
   lastTime: number
   totalSeconds: number
+}
+
+export type HostLifeStorageMap = {
+  [hostname in string]: HostLifeStorage
 }
 
 export class HostLife {
@@ -34,7 +40,7 @@ export class HostLife {
   }
 
   async getStorageTotalSeconds(): Promise<number> {
-    const HostLife = await storageGet<HostLifeStorage>(this.hostname)
+    const HostLife = await getStorageByKey<HostLifeStorage>(this.hostname)
     if (HostLife === null) {
       return 0
     }
@@ -56,36 +62,28 @@ export class HostLife {
 
 async function storageSet<T>(key: string, val: T) {
   return new Promise((resolve, reject) => {
-    chrome.storage.local.set({ [key]: val }, () => resolve('success'));
+    chrome.storage.local.set({ [key]: val });
   })
 }
 
-/**
- * 获取storage的内容
- * @param key 未传入,undefined: 返回所有storage
- * @param key string: 返回指定hostname的storage,如果没有,返回null
- */
-function storageGet<T>(): Promise<{ [k in string]: HostLife }>
-function storageGet<T>(key: string): Promise<T | null>
-async function storageGet<T>(key?: string): Promise<T | null | { [k in string]: T }> {
+export function getStorageByKey<T>(key: string): Promise<T | null> {
   return new Promise((resolve, reject) => {
-    chrome.storage.local.get(key ?? null, (res) => {
-      // 空对象判断
+    chrome.storage.local.get(key, (res) => {
       if (Object.keys(res).length === 0) {
         resolve(null)
       } else {
-        if (key) {
-          resolve(res[key])
-        } else {
-          resolve(res)
-        }
+        resolve(res[key])
       }
     });
   })
 }
 
-export function getStorageAll() {
-  return storageGet()
+export function getAllStorage(): Promise<HostLifeStorageMap> {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get(null, (res) => {
+      resolve(res)
+    })
+  })
 }
 
 export function clearStorage() {

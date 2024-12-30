@@ -11,6 +11,7 @@ export default defineConfig({
     outDir: r('extension/dist/background'),
     cssCodeSplit: false,
     emptyOutDir: false,
+    minify: isDev ? false: true,
     sourcemap: isDev ? 'inline' : false,
     lib: {
       entry: r('src/background/index.ts'),

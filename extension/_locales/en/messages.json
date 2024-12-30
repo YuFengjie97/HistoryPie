@@ -38,5 +38,29 @@
   "refresh": {
     "message": "refresh",
     "description": ""
+  },
+  "second": {
+    "message": "second",
+    "description": ""
+  },
+  "minute": {
+    "message": "minute",
+    "description": ""
+  },
+  "hour": {
+    "message": "hour",
+    "description": ""
+  },
+  "day": {
+    "message": "day",
+    "description": ""
+  },
+  "lastVisit": {
+    "message": "last visit",
+    "description": ""
+  },
+  "browseTime": {
+    "message": "browsing time",
+    "description": ""
   }
 }

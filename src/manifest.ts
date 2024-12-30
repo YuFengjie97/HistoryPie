@@ -12,7 +12,7 @@ export async function getMainfest() {
     description: "__MSG_app_description__",
     action: {
       default_icon: 'assets/icon-pie.png',
-      default_popup: "dist/popup/index.html"
+      // default_popup: "dist/popup/index.html"
     },
     icons: {
       16: "assets/icon-pie.png",
@@ -30,7 +30,6 @@ export async function getMainfest() {
     ],
     background: {
       service_worker: "dist/background/index.mjs",
-      type: "module"
     },
     permissions: ["tabs", "storage", "activeTab", "scripting"],
     web_accessible_resources: [

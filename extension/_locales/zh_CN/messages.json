@@ -38,5 +38,29 @@
   "refresh": {
     "message": "刷新",
     "description": ""
+  },
+  "second": {
+    "message": "秒",
+    "description": ""
+  },
+  "minute": {
+    "message": "分钟",
+    "description": ""
+  },
+  "hour": {
+    "message": "小时",
+    "description": ""
+  },
+  "day": {
+    "message": "天",
+    "description": ""
+  },
+  "lastVisit": {
+    "message": "上次访问",
+    "description": ""
+  },
+  "browseTime": {
+    "message": "浏览时长",
+    "description": ""
   }
 }

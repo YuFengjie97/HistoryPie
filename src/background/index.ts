@@ -1,14 +1,14 @@
-import { clearStorage, getStorageAll, getUrlInfo, HostLife } from "./utils";
+import { clearStorage, getAllStorage, getUrlInfo, HostLife } from "./utils";
 import { type Message } from '../api/index'
 
+export type HostLifeMap = {
+  [hostname in string]: HostLife
+}
 
-type HostName = string
 
-const hostMap: {
-  [hostname in HostName]: HostLife
-} = {}
+const hostMap: HostLifeMap = {}
 
-let hostCurrent: HostName | null = null
+let hostCurrent: string | null = null
 
 /**
  * 在激活/更新tab,时,在当前tab/新tab跳转页面(跳转相同hostname/不同)
@@ -77,7 +77,7 @@ chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse) =>
   }
 
   if (message.type === "getStorage") {
-    getStorageAll().then(res => {
+    getAllStorage().then(res => {
       sendResponse({ data: res })
     })
   }

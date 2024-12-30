@@ -1,11 +1,11 @@
-import { HostLife } from "../background/utils";
+import { type HostLifeStorage, type HostLife, type HostLifeMap, type HostLifeStorageMap } from "../background/utils";
 
 export interface Message {
   type: string,
   preload?: any
 }
 
-export function sendMessage(message: Message): Promise<{ data: HostLife }> {
+export function sendMessage<T>(message: Message): Promise<{ data: T }> {
   return new Promise((resolve, reject) => {
     chrome.runtime.sendMessage(message, (res: any) => {
       if (chrome.runtime.lastError) {
@@ -20,14 +20,16 @@ export function sendMessage(message: Message): Promise<{ data: HostLife }> {
 }
 
 
-export function getHostMap() {
-  return sendMessage({ type: 'getHostMap' })
+export async function getHostMap(): Promise<HostLifeMap> {
+  const { data } = await sendMessage<HostLifeMap>({ type: 'getHostMap' })
+  return data
 }
 
-export function getStorage()  {
-  return sendMessage({ type: 'getStorage' })
+export async function getStorage(): Promise<HostLifeStorage[]> {
+  const { data } = await sendMessage<HostLifeStorageMap>({ type: 'getStorage' })
+  return Object.values(data)
 }
 
-export function clearStorage() {
-  return sendMessage({ type: 'clearStorage' })
+export async function clearStorage() {
+  return await sendMessage({ type: 'clearStorage' })
 }

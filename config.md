@@ -27,3 +27,4 @@
 - background编译为index.mjs  mjs会告诉浏览器我是使用es模块规范的js文件.在明确使用<script type="module"/>时,浏览器对待mjs/js都会将其作为模块使用
 - content编译为index.global.js  global只有语义的"全局(content作为页面注入脚本,意为全局)",没有实际作用.
 - `git rm -r --cached .`
+- 在background.ts中`export * from './index'`编译后在插件环境中报错

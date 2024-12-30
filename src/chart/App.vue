@@ -4,6 +4,7 @@ import * as echarts from 'echarts';
 import { getStorage, getHostMap, clearStorage } from '../api';
 import { type HostLifeStorage } from '../background/utils';
 import { i18n } from '../utils/locales';
+import * as dayjs from 'dayjs'
 
 type SeriesData = Array<{
   name: string

@@ -11,6 +11,7 @@ export async function getMainfest() {
     version: pkg.version,
     description: "__MSG_app_description__",
     action: {
+      default_icon: 'assets/icon-pie.png',
       default_popup: "dist/popup/index.html"
     },
     icons: {

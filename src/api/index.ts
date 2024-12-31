@@ -1,11 +1,13 @@
-import { type HostLifeStorage, type HostLife, type HostLifeMap, type HostLifeStorageMap } from "../background/utils";
+import { TabLife, type TabLifePP } from "../background/utils";
 
 export interface Message {
   type: string,
   preload?: any
 }
 
-export function sendMessage<T>(message: Message): Promise<{ data: T }> {
+export type TabLifeStorage = { [k in string]: TabLifePP[] }
+
+function sendMessage<T>(message: Message): Promise<{ data: T }> {
   return new Promise((resolve, reject) => {
     chrome.runtime.sendMessage(message, (res: any) => {
       if (chrome.runtime.lastError) {
@@ -19,15 +21,9 @@ export function sendMessage<T>(message: Message): Promise<{ data: T }> {
   })
 }
 
-
-export async function getHostMap(): Promise<HostLifeMap> {
-  const { data } = await sendMessage<HostLifeMap>({ type: 'getHostMap' })
+export async function getTabLifeStorage() {
+  const { data } = await sendMessage<TabLifeStorage>({ type: 'getStorage' })
   return data
-}
-
-export async function getStorage(): Promise<HostLifeStorage[]> {
-  const { data } = await sendMessage<HostLifeStorageMap>({ type: 'getStorage' })
-  return Object.values(data)
 }
 
 export async function clearStorage() {

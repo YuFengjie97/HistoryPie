@@ -1,22 +1,23 @@
 export * from './index'
 
-export type HostLifeStorage = {
-  hostname: string
-  lastTime: number
-  totalSeconds: number
+export type PublicProperties<T> = {
+  [k in keyof T as T[k] extends Function ? never : k]: T[k]
 }
 
-export type HostLifeStorageMap = {
-  [hostname in string]: HostLifeStorage
+export type TabLifePP = PublicProperties<TabLife>
+
+
+export type TabLifeMap = {
+  [hostname in string]: TabLife[]
 }
 
-export class HostLife {
+
+export class TabLife {
   hostname: string
   // 在一次访问中(处于当前正在活跃的标签页时)的起始时间和结束时间
   enterTime: number
   leaveTime: number = 0
-  // 上次最后一次访问
-  lastTime: number = 0
+  seconds: number = 0
 
   constructor(hostname: string) {
     const now = new Date().getTime()
@@ -24,43 +25,37 @@ export class HostLife {
     this.enterTime = now
   }
 
-  async handleEnter() {
-    const now = new Date().getTime()
-    this.enterTime = now
-    this.lastTime = this.enterTime
-  }
-
   async handleLeave() {
     const now = new Date().getTime()
     this.leaveTime = now
-    this.lastTime = now
     const milliseconds = this.leaveTime - this.enterTime
-    const seconds = millisecondsToSeconds(milliseconds)
-    await this.updateStorage(seconds)
+    this.seconds = millisecondsToSeconds(milliseconds)
+
+    await this.updateStorage()
   }
 
-  async getStorageTotalSeconds(): Promise<number> {
-    const HostLife = await getStorageByKey<HostLifeStorage>(this.hostname)
-    if (HostLife === null) {
-      return 0
-    }
-    const { totalSeconds } = HostLife
-    return totalSeconds
-  }
-
-  async updateStorage(seconds: number) {
-    const secondsSave = await this.getStorageTotalSeconds()
-    const secondsUpdate = secondsSave + seconds
-
-    storageSet<HostLifeStorage>(this.hostname, {
+  async updateStorage() {
+    const list = await this.getStorageByHostname()
+    list.push({
       hostname: this.hostname,
-      lastTime: this.lastTime,
-      totalSeconds: secondsUpdate
+      enterTime: this.enterTime,
+      leaveTime: this.leaveTime,
+      seconds: this.seconds
     })
+    await this.setStorageByHostname(list)
+  }
+
+  async getStorageByHostname(): Promise<TabLifePP[]> {
+    const list = await getStorageByKey<TabLifePP[]>(this.hostname)
+    return list === null ? [] : list
+  }
+
+  async setStorageByHostname(TabLifeList: TabLifePP[]) {
+    await setStorageByKey(this.hostname, TabLifeList)
   }
 }
 
-async function storageSet<T>(key: string, val: T) {
+async function setStorageByKey<T>(key: string, val: T) {
   return new Promise((resolve, reject) => {
     chrome.storage.local.set({ [key]: val });
   })
@@ -69,16 +64,14 @@ async function storageSet<T>(key: string, val: T) {
 export function getStorageByKey<T>(key: string): Promise<T | null> {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get(key, (res) => {
-      if (Object.keys(res).length === 0) {
-        resolve(null)
-      } else {
+      if(res[key] !== undefined) {
         resolve(res[key])
       }
     });
   })
 }
 
-export function getAllStorage(): Promise<HostLifeStorageMap> {
+export function getStorageAll() {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get(null, (res) => {
       resolve(res)

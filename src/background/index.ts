@@ -1,34 +1,27 @@
-import { clearStorage, getAllStorage, getUrlInfo, HostLife } from "./utils";
+import { clearStorage, getStorageAll, getUrlInfo, TabLife } from "./utils";
 import { type Message } from '../api/index'
 
-export type HostLifeMap = {
-  [hostname in string]: HostLife
+export type TabLifeMap = {
+  [hostname in string]: TabLife
 }
 
 
-const hostMap: HostLifeMap = {}
-
-let hostCurrent: string | null = null
+let tabLifeActive: TabLife | null = null
 
 /**
  * 在激活/更新tab,时,在当前tab/新tab跳转页面(跳转相同hostname/不同)
  */
-async function updateHostLife() {
+async function updateTabLife() {
   // 旧地址更新
-  hostCurrent && hostMap[hostCurrent]?.handleLeave()
+  if (tabLifeActive) {
+    tabLifeActive?.handleLeave()
+  }
 
   // 新地址更新 / 创建
   const { hostname } = await getUrlInfo()
-  if (hostname !== null) {
-    if (!hostMap[hostname]) {
-      hostMap[hostname] = new HostLife(hostname)
-    } else {
-      hostMap[hostname].handleEnter()
-    }
+  if (hostname) {
+    tabLifeActive = new TabLife(hostname)
   }
-
-  // 特殊网站也要记录
-  hostCurrent = hostname
 }
 
 /**
@@ -39,7 +32,7 @@ async function updateHostLife() {
  */
 chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   console.log('tab Active   ');
-  await updateHostLife()
+  await updateTabLife()
 });
 
 
@@ -51,9 +44,7 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
  */
 chrome.tabs.onRemoved.addListener(async (tabId) => {
   console.log('tab Remove  ');
-
-  const { hostname } = await getUrlInfo()
-  hostname && hostMap[hostname]?.handleLeave()
+  tabLifeActive?.handleLeave()
 });
 
 /**
@@ -65,19 +56,16 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete') {
     console.log('tab Update  ');
 
-    await updateHostLife()
+    await updateTabLife()
   }
 });
 
 
 // 通信
 chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse) => {
-  if (message.type === 'getHostMap') {
-    sendResponse({ data: hostMap })
-  }
 
   if (message.type === "getStorage") {
-    getAllStorage().then(res => {
+    getStorageAll().then(res => {
       sendResponse({ data: res })
     })
   }
@@ -93,5 +81,5 @@ chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse) =>
 
 chrome.action.onClicked.addListener(() => {
   const url = chrome.runtime.getURL(`dist/chart/index.html`);
-  chrome.tabs.create({ url }, (tab) => {});
+  chrome.tabs.create({ url }, (tab) => { });
 })

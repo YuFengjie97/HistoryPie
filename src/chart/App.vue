@@ -1,15 +1,33 @@
 <script lang="ts" setup>
 import { ref, onMounted, watch } from 'vue';
 import * as echarts from 'echarts';
-import { getStorage, getHostMap, clearStorage } from '../api';
-import { type HostLifeStorage } from '../background/utils';
+import { getTabLifeStorage, clearStorage } from '../api';
 import { i18n } from '../utils/locales';
+import { type TabLifePP } from '../background/utils'
+import { flatArray } from '../utils';
 import dayjs from 'dayjs'
+import { hostname } from 'os';
 
+
+type ChartItemData = {
+  hostname: string
+  seconds: number
+  lastTime: number
+}
+
+type DataItem = ChartItemData & {
+  list: TabLifePP[]
+}
 
 const chartDom = ref<HTMLElement>()
-const dateRange = ref()
+const now = new Date()
+const lastMonth = dayjs(now).subtract(1, 'month').toDate()
+const dateRange = ref([
+  lastMonth,
+  now
+])
 const isCheckAll = ref(false)
+
 
 
 function timeFormat(secs: number) {
@@ -24,14 +42,16 @@ function timeFormat(secs: number) {
 }
 
 
-let initChart = function (data: HostLifeStorage[]) {
+let initChart = function (data: ChartItemData[]) {
+  console.log(data);
+  
 
   let echartIns = echarts.init(chartDom.value)
 
-  function _update(data: HostLifeStorage[]) {
+  function _update(data: ChartItemData[]) {
     const seriesData = data.map(item => ({
       name: item.hostname,
-      value: item.totalSeconds,
+      value: item.seconds,
       lastTime: item.lastTime
     }))
 
@@ -77,20 +97,91 @@ let initChart = function (data: HostLifeStorage[]) {
   initChart = _update
 }
 
+async function refresh() {
+  let data = await getData()
 
-async function getData() {
-  let data = await getStorage()
-  data = filterData(data)
+  data = filterDataByRange(data)
+  data = sortDataBySeconds(data)
+
+  if (!isCheckAll.value) {
+    data = filterDataByTop10(data)
+  }
+
   initChart(data)
 }
 
-async function handleLogHostMap() {
-  const hostMap = await getHostMap()
-  console.log(hostMap);
+
+async function getData(): Promise<DataItem[]> {
+  const res = await getTabLifeStorage()
+
+  return Object.keys(res).map(k => ({
+    hostname: k,
+    seconds: 0,
+    lastTime: 0,
+    list: res[k],
+  }))
 }
 
+
+function filterDataByRange(data: DataItem[]): DataItem[] {
+  const [s, e] = dateRange.value
+  return data.map((item) => {
+    const { list } = item
+    let lastTime = 0
+    const filterList = list.filter(tab => {
+      const { enterTime, leaveTime } = tab
+
+      if (enterTime >= s.getTime() && leaveTime <= e.getTime()) {
+        if (leaveTime > lastTime) {
+          lastTime = leaveTime
+        }
+        return true
+      }
+
+      return false
+    })
+    
+    return {
+      ...item,
+      lastTime,
+      list: filterList
+    }
+  })
+}
+
+
+function sortDataBySeconds(data: DataItem[]) {
+  return data.map(item => {
+    const { list } = item
+    const seconds = list.reduce((acc, cur) => {
+      return acc + cur.seconds
+    }, 0)
+    return {
+      ...item,
+      seconds
+    }
+  }).sort((a, b) => b.seconds - a.seconds)
+}
+
+function filterDataByTop10(data: DataItem[]) {
+  return data.slice(0, 10)
+}
+
+
+function datePickerChange() {
+  refresh()
+}
+
+function checkAll() {
+  refresh()
+}
+
+onMounted(async () => {
+  refresh()
+})
+
 async function handleLogStorage() {
-  const data = await getStorage()
+  const data = await getData()
   console.log(data);
 }
 
@@ -98,55 +189,12 @@ async function handleClearStorage() {
   await clearStorage()
   await getData()
 }
-
-function filterByRange(data: HostLifeStorage[]) {
-  return data.filter(item => {
-    const [s, e] = dateRange.value
-    const start = dayjs(s).valueOf()
-    const end = dayjs(e).valueOf()
-    return item.lastTime >= start && item.lastTime <= end
-  })
-}
-
-function filterDataBySort(data: HostLifeStorage[]) {
-  return data.sort((a, b) => b.totalSeconds - a.totalSeconds)
-}
-
-function filterByTop10(data: HostLifeStorage[]) {
-  return data.slice(0, 10)
-}
-
-function filterData(data: HostLifeStorage[]) {
-  if (dateRange.value) {
-    data = filterByRange(data)
-  }
-  data = filterDataBySort(data)
-  if (!isCheckAll.value) {
-    data = filterByTop10(data)
-  }
-  return data
-}
-
-
-function datePickerChange() {
-  getData()
-}
-
-function checkAll() {
-  getData()
-}
-
-onMounted(async () => {
-  getData()
-})
-
 </script>
 
 <template>
   <main>
     <div class="bt-group">
       <button @click="getData">refresh</button>
-      <button @click="handleLogHostMap">host map</button>
       <button @click="handleLogStorage">storage</button>
       <button @click="handleClearStorage">clear storage</button>
       <br />

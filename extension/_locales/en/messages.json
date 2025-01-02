@@ -86,5 +86,8 @@
   },
   "clearHistory": {
     "message": "clear history"
+  },
+  "resetTimeRange": {
+    "message": "reset time range"
   }
 }

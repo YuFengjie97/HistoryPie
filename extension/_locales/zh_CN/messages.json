@@ -86,5 +86,8 @@
   },
   "clearHistory": {
     "message": "清除记录"
+  },
+  "resetTimeRange": {
+    "message": "重置时间区间"
   }
 }

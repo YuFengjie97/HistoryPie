@@ -203,6 +203,13 @@ async function handleLogStorage() {
 function handleRadioChange() {
   refresh()
 }
+
+function handleResetTimeRange() {
+  const now = new Date()
+  const lastMonth = dayjs(now).subtract(1, 'month').toDate()
+  dateRange.value = [lastMonth, now]
+  refresh()
+}
 </script>
 
 <template>
@@ -220,6 +227,9 @@ function handleRadioChange() {
           @change="refresh"
         />
       </div>
+      
+      <el-button class="m-r-10px" type="primary" @click="handleResetTimeRange">{{ i18n('resetTimeRange') }}</el-button>
+
       <div class="flex-grow-0 m-r-10px">
         <el-radio-group @change="handleRadioChange" v-model="showNum">
           <el-radio value="all" size="large">{{ i18n('showAll') }}</el-radio>

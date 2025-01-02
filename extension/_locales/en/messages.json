@@ -62,5 +62,29 @@
   "browseTime": {
     "message": "browsing time",
     "description": ""
+  },
+  "delateAllData": {
+    "message": "Do you want to clear all the data?"
+  },
+  "confirm": {
+    "message": "confirm"
+  },
+  "cancel": {
+    "message": "cancel"
+  },
+  "deleteSuccess": {
+    "message": "Deleted successfully"
+  },
+  "showAll": {
+    "message": "show all"
+  },
+  "top10": {
+    "message": "only top 10"
+  },
+  "logInConsole": {
+    "message": "log in console"
+  },
+  "clearHistory": {
+    "message": "clear history"
   }
 }

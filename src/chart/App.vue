@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import * as echarts from 'echarts'
 import { getTabLifeStorage, clearStorage } from '../api'
 import { i18n } from '../utils/locales'
@@ -175,9 +175,9 @@ function filterDataByTop10(data: DataItem[]) {
 }
 
 function handleClearStorage() {
-  ElMessageBox.confirm('你要清除所有记录的数据吗?', 'Warning', {
-    confirmButtonText: 'OK',
-    cancelButtonText: 'Cancel',
+  ElMessageBox.confirm(i18n('delateAllData'), 'Warning', {
+    confirmButtonText: i18n('confirm'),
+    cancelButtonText: i18n('cancel'),
     type: 'warning',
   }).then(async () => {
     await clearStorage()
@@ -185,7 +185,7 @@ function handleClearStorage() {
 
     ElMessage({
       type: 'success',
-      message: '删除成功',
+      message: i18n('deleteSuccess'),
     })
   })
 }
@@ -221,13 +221,13 @@ function handleRadioChange() {
       </div>
       <div class="flex-grow-0 m-r-10px">
         <el-radio-group @change="handleRadioChange" v-model="showNum">
-          <el-radio value="all" size="large">展示全部</el-radio>
-          <el-radio value="top10" size="large">只看前十</el-radio>
+          <el-radio value="all" size="large">{{ i18n('showAll') }}</el-radio>
+          <el-radio value="top10" size="large">{{ i18n('top10') }}</el-radio>
         </el-radio-group>
       </div>
 
-      <el-button type="primary" @click="handleLogStorage">控制台输出</el-button>
-      <el-button type="warning" @click="handleClearStorage">清除记录</el-button>
+      <el-button type="primary" @click="handleLogStorage">{{ i18n('logInConsole') }}</el-button>
+      <el-button type="warning" @click="handleClearStorage">{{ i18n('clearHistory') }}</el-button>
     </div>
     <div class="chart" ref="chartDom"></div>
   </main>

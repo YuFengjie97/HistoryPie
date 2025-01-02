@@ -62,5 +62,29 @@
   "browseTime": {
     "message": "浏览时长",
     "description": ""
+  },
+  "delateAllData": {
+    "message": "你要清除所有数据吗?"
+  },
+  "confirm": {
+    "message": "确认"
+  },
+  "cancel": {
+    "message": "取消"
+  },
+  "deleteSuccess": {
+    "message": "删除成功"
+  },
+  "showAll": {
+    "message": "展示全部"
+  },
+  "top10": {
+    "message": "只看前十"
+  },
+  "logInConsole": {
+    "message": "控制台输出"
+  },
+  "clearHistory": {
+    "message": "清除记录"
   }
 }

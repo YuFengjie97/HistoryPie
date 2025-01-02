@@ -103,7 +103,7 @@ async function refresh() {
   data = filterDataByRange(data)
   data = sortDataBySeconds(data)
 
-  if ((showNum.value === 'top10')) {
+  if (showNum.value === 'top10') {
     data = filterDataByTop10(data)
   }
 
@@ -191,16 +191,9 @@ function handleRadioChange() {
 
 <template>
   <main>
-    <div class="bt-group">
-      <button @click="refresh">refresh</button>
-      <button @click="handleLogStorage">storage</button>
-      <button @click="handleClearStorage">clear storage</button>
-      <br />
-      <el-radio-group @change="handleRadioChange" v-model="showNum">
-        <el-radio value="all" size="large">展示全部</el-radio>
-        <el-radio value="top10" size="large">只看前十</el-radio>
-      </el-radio-group>
+    <div class="form">
       <el-date-picker
+        class="date-picker"
         v-model="dateRange"
         type="datetimerange"
         start-placeholder="Start date"
@@ -210,15 +203,26 @@ function handleRadioChange() {
         time-format="A hh:mm:ss"
         @change="refresh"
       />
+      <el-radio-group @change="handleRadioChange" v-model="showNum">
+        <el-radio value="all" size="large">展示全部</el-radio>
+        <el-radio value="top10" size="large">只看前十</el-radio>
+      </el-radio-group>
+      <el-button type="primary" @click="handleLogStorage">控制台输出</el-button>
+      <el-button type="warning" @click="handleClearStorage">清除记录</el-button>
     </div>
     <div class="chart" ref="chartDom"></div>
   </main>
 </template>
 
 <style lang="less" scoped>
+ .form {
+    height: 40px;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+  }
 .chart {
-  height: 400px;
-
+  height: 500px;
   ::v-deep(.custom-tooltip) {
     .name {
       font-weight: 600;
@@ -231,5 +235,7 @@ function handleRadioChange() {
       }
     }
   }
+
+ 
 }
 </style>

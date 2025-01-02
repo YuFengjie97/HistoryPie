@@ -4,6 +4,7 @@ import * as echarts from 'echarts'
 import { getTabLifeStorage, clearStorage } from '../api'
 import { i18n } from '../utils/locales'
 import { type TabLifePP } from '../background/utils'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
 
 type ChartItemData = {
@@ -35,8 +36,6 @@ function timeFormat(secs: number) {
 }
 
 let initChart = function (data: ChartItemData[]) {
-  console.log(data)
-
   let echartIns = echarts.init(chartDom.value)
 
   function _update(data: ChartItemData[]) {
@@ -98,7 +97,12 @@ let initChart = function (data: ChartItemData[]) {
 }
 
 async function refresh() {
-  let data = await getData()
+  const data = await getData()
+  initChart(data)
+}
+
+async function getData() {
+  let data = await getStorageData()
 
   data = filterDataByRange(data)
   data = sortDataBySeconds(data)
@@ -106,11 +110,10 @@ async function refresh() {
   if (showNum.value === 'top10') {
     data = filterDataByTop10(data)
   }
-
-  initChart(data)
+  return data
 }
 
-async function getData(): Promise<DataItem[]> {
+async function getStorageData(): Promise<DataItem[]> {
   const res = await getTabLifeStorage()
 
   return Object.keys(res).map((k) => ({
@@ -171,6 +174,22 @@ function filterDataByTop10(data: DataItem[]) {
   return data
 }
 
+function handleClearStorage() {
+  ElMessageBox.confirm('你要清除所有记录的数据吗?', 'Warning', {
+    confirmButtonText: 'OK',
+    cancelButtonText: 'Cancel',
+    type: 'warning',
+  }).then(async () => {
+    await clearStorage()
+    refresh()
+
+    ElMessage({
+      type: 'success',
+      message: '删除成功',
+    })
+  })
+}
+
 onMounted(async () => {
   refresh()
 })
@@ -180,33 +199,33 @@ async function handleLogStorage() {
   console.log(data)
 }
 
-async function handleClearStorage() {
-  await clearStorage()
-  await getData()
-}
 function handleRadioChange() {
   refresh()
 }
 </script>
 
 <template>
-  <main>
-    <div class="form">
-      <el-date-picker
-        class="date-picker"
-        v-model="dateRange"
-        type="datetimerange"
-        start-placeholder="Start date"
-        end-placeholder="End date"
-        format="YYYY-MM-DD HH:mm:ss"
-        date-format="YYYY/MM/DD ddd"
-        time-format="A hh:mm:ss"
-        @change="refresh"
-      />
-      <el-radio-group @change="handleRadioChange" v-model="showNum">
-        <el-radio value="all" size="large">展示全部</el-radio>
-        <el-radio value="top10" size="large">只看前十</el-radio>
-      </el-radio-group>
+  <main class="p-10px">
+    <div class="flex flex-wrap flex-items-center m-b-20px">
+      <div class="min-w-440px flex-grow-0">
+        <el-date-picker
+          v-model="dateRange"
+          type="datetimerange"
+          start-placeholder="Start date"
+          end-placeholder="End date"
+          format="YYYY-MM-DD HH:mm:ss"
+          date-format="YYYY/MM/DD ddd"
+          time-format="A hh:mm:ss"
+          @change="refresh"
+        />
+      </div>
+      <div class="flex-grow-0 m-r-10px">
+        <el-radio-group @change="handleRadioChange" v-model="showNum">
+          <el-radio value="all" size="large">展示全部</el-radio>
+          <el-radio value="top10" size="large">只看前十</el-radio>
+        </el-radio-group>
+      </div>
+
       <el-button type="primary" @click="handleLogStorage">控制台输出</el-button>
       <el-button type="warning" @click="handleClearStorage">清除记录</el-button>
     </div>
@@ -215,12 +234,6 @@ function handleRadioChange() {
 </template>
 
 <style lang="less" scoped>
- .form {
-    height: 40px;
-    display: flex;
-    flex-flow: row nowrap;
-    align-items: center;
-  }
 .chart {
   height: 500px;
   ::v-deep(.custom-tooltip) {
@@ -235,7 +248,5 @@ function handleRadioChange() {
       }
     }
   }
-
- 
 }
 </style>

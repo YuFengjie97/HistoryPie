@@ -4,16 +4,20 @@ import Vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import UnoCSS from 'unocss/vite'
 
 export const sharedConfig = {
   root: r("src"),
-  plugins: [Vue(),
-  AutoImport({
-    resolvers: [ElementPlusResolver()],
-  }),
-  Components({
-    resolvers: [ElementPlusResolver()],
-  }),],
+  plugins: [
+    Vue(),
+    AutoImport({
+      resolvers: [ElementPlusResolver()],
+    }),
+    Components({
+      resolvers: [ElementPlusResolver()],
+    }),
+    UnoCSS(),
+  ],
 }
 
 export default defineConfig(({ command }) => ({
@@ -32,7 +36,7 @@ export default defineConfig(({ command }) => ({
     sourcemap: isDev ? 'inline' : false,
     rollupOptions: {
       input: {
-        popup: r('src/popup/index.html'),
+        // popup: r('src/popup/index.html'),
         chart: r('src/chart/index.html')
       },
     },

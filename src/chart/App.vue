@@ -17,6 +17,7 @@ type DataItem = ChartItemData & {
   list: TabLifePP[]
 }
 
+
 const chartDom = ref<HTMLElement>()
 const now = new Date()
 const lastMonth = dayjs(now).subtract(1, 'month').toDate()
@@ -151,7 +152,7 @@ function filterDataByRange(data: DataItem[]): DataItem[] {
   })
 }
 
-function sortDataBySeconds(data: DataItem[]) {
+function sortDataBySeconds(data: DataItem[]): DataItem[] {
   return data
     .map((item) => {
       const { list } = item
@@ -167,7 +168,7 @@ function sortDataBySeconds(data: DataItem[]) {
     .sort((a, b) => b.seconds - a.seconds)
 }
 
-function filterDataByTop10(data: DataItem[]) {
+function filterDataByTop10(data: DataItem[]): DataItem[] {
   if (data.length > 10) {
     return data.slice(0, 10)
   }
@@ -195,8 +196,8 @@ onMounted(async () => {
 })
 
 async function handleLogStorage() {
-  const data = await getData()
-  console.log(data)
+  const res = await getTabLifeStorage()
+  console.log(res)
 }
 
 function handleRadioChange() {

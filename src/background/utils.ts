@@ -7,10 +7,7 @@ export type PublicProperties<T> = {
 export type TabLifePP = PublicProperties<TabLife>
 
 
-export type TabLifeMap = {
-  [hostname in string]: TabLife[]
-}
-
+type UrlInfo = { protocol: string, hostname: string }
 
 export class TabLife {
   hostname: string
@@ -36,6 +33,7 @@ export class TabLife {
 
   async updateStorage() {
     const list = await this.getStorageByHostname()
+
     list.push({
       hostname: this.hostname,
       enterTime: this.enterTime,
@@ -55,17 +53,20 @@ export class TabLife {
   }
 }
 
-async function setStorageByKey<T>(key: string, val: T) {
+function setStorageByKey<T>(key: string, val: T): Promise<void> {
   return new Promise((resolve, reject) => {
     chrome.storage.local.set({ [key]: val });
+    resolve()
   })
 }
 
 export function getStorageByKey<T>(key: string): Promise<T | null> {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get(key, (res) => {
-      if(res[key] !== undefined) {
+      if (res[key] !== undefined) {
         resolve(res[key])
+      } else {
+        resolve(null)
       }
     });
   })
@@ -91,29 +92,25 @@ export function millisecondsToSeconds(milliseconds: number) {
   return milliseconds / 1000;
 }
 
-
-export function parseHostname(url: string): string | null {
+export function parseUrl(url: string): UrlInfo | null {
   try {
     const { protocol, hostname } = new URL(url)
-
-    // 只收集http协议的网站
-    if (!['https:', 'http'].includes(protocol)) return null
-
-    return hostname
+    return {
+      protocol,
+      hostname
+    }
   } catch (e) {
     return null
   }
 }
 
-export function getUrlInfo(): Promise<{
-  hostname: string | null
-  url: string,
-}> {
+export function getUrlInfo(): Promise<UrlInfo | null> {
   return new Promise((resolve, reject) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       let url = (tabs[0] && tabs[0].url) ?? ''
-      const hostname = parseHostname(url)
-      resolve({ hostname, url })
+      const urlInfo = parseUrl(url)
+      
+      resolve(urlInfo)
     });
   })
 }

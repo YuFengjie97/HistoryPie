@@ -13,15 +13,20 @@ let tabLifeActive: TabLife | null = null
  */
 async function updateTabLife() {
   // 旧地址更新
-  if (tabLifeActive) {
-    tabLifeActive?.handleLeave()
-  }
+  await tabLifeActive?.handleLeave()
 
   // 新地址更新 / 创建
-  const { hostname } = await getUrlInfo()
-  if (hostname) {
-    tabLifeActive = new TabLife(hostname)
+  const urlInfo = await getUrlInfo()
+  if (urlInfo) {
+    const { protocol, hostname } = urlInfo
+    if (['http:', 'https:'].includes(protocol)) {
+      tabLifeActive = new TabLife(hostname)
+    }
+    else {
+      tabLifeActive = null
+    }
   }
+
 }
 
 /**

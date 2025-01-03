@@ -1,10 +1,10 @@
 {
   "app_name": {
-    "message": "浏览历史",
+    "message": "历史饼图",
     "description": ""
   },
   "app_description":{
-    "message": "记录你的浏览网页的时间,查看你都在哪些地方浪费了时间",
+    "message": "记录你的浏览网页的时间,查看你都在哪些网站浪费了时间",
     "description": ""
   },
   "clear_storage": {

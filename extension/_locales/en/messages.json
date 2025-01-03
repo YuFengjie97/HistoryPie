@@ -1,10 +1,10 @@
 {
   "app_name": {
-    "message": "Browse History",
+    "message": "History Pie",
     "description": ""
   },
   "app_description":{
-    "message": "Record your web browsing time and see where you are wasting your time.",
+    "message": "Record your web browsing time and see which website you are wasting your time.",
     "description": ""
   },
   "clear_storage": {

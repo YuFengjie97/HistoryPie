@@ -36,7 +36,6 @@ export default defineConfig(({ command }) => ({
     sourcemap: isDev ? 'inline' : false,
     rollupOptions: {
       input: {
-        // popup: r('src/popup/index.html'),
         chart: r('src/chart/index.html')
       },
     },

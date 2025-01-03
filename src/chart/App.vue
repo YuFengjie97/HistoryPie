@@ -227,8 +227,6 @@ function handleResetTimeRange() {
           @change="refresh"
         />
       </div>
-      
-      <el-button class="m-r-10px" type="primary" @click="handleResetTimeRange">{{ i18n('resetTimeRange') }}</el-button>
 
       <div class="flex-grow-0 m-r-10px">
         <el-radio-group @change="handleRadioChange" v-model="showNum">
@@ -237,6 +235,7 @@ function handleResetTimeRange() {
         </el-radio-group>
       </div>
 
+      <el-button class="m-r-10px" type="primary" @click="handleResetTimeRange">{{ i18n('refresh') }}</el-button>
       <el-button type="primary" @click="handleLogStorage">{{ i18n('logInConsole') }}</el-button>
       <el-button type="warning" @click="handleClearStorage">{{ i18n('clearHistory') }}</el-button>
     </div>

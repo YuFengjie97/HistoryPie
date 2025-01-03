@@ -15,7 +15,7 @@
     "build:background": "vite build --config vite.config.background.ts",
     "build:content": "vite build --config vite.config.content.ts",
     "build:page": "vite build",
-    "pack:crx": "crx pack extension -o crx/extension.crx"
+    "pack:crx": "crx pack extension -o crx/HistoryPie.crx"
   },
   "keywords": [],
   "author": "",

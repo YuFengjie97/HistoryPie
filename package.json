@@ -13,7 +13,7 @@
     "build:prepare": "tsx scripts/prepare.ts",
     "build:background": "vite build --config vite.config.background.ts",
     "build:page": "vite build",
-    "pack:crx": "crx pack extension -o crx/HistoryPie.crx"
+    "pack:crx": "crx pack extension -o pack/HistoryPie.crx"
   },
   "keywords": [],
   "author": "",

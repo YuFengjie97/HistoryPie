@@ -36,7 +36,7 @@ async function updateTabLife() {
  * 2. 从历史记录/url直接打开
  */
 chrome.tabs.onActivated.addListener(async ({ tabId }) => {
-  console.log('tab Active   ');
+  // console.log('tab Active   ');
   await updateTabLife()
 });
 
@@ -48,7 +48,7 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
  * 2. 关闭整个窗口
  */
 chrome.tabs.onRemoved.addListener(async (tabId) => {
-  console.log('tab Remove  ');
+  // console.log('tab Remove  ');
   tabLifeActive?.handleLeave()
 });
 
@@ -59,7 +59,7 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
  */
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete') {
-    console.log('tab Update  ');
+    // console.log('tab Update  ');
 
     await updateTabLife()
   }

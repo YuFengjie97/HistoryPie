@@ -17,7 +17,6 @@ type DataItem = ChartItemData & {
   list: TabLifePP[]
 }
 
-
 const chartDom = ref<HTMLElement>()
 const now = new Date()
 const lastMonth = dayjs(now).subtract(1, 'month').toDate()
@@ -36,7 +35,7 @@ function timeFormat(secs: number) {
   return `${(secs / 60 / 60 / 24).toFixed(1)} ${i18n('day')}`
 }
 
-let initChart = function (data: ChartItemData[]) {
+let initChart = function (data: ChartItemData[]): echarts.ECharts {
   let echartIns = echarts.init(chartDom.value)
 
   function _update(data: ChartItemData[]) {
@@ -91,15 +90,46 @@ let initChart = function (data: ChartItemData[]) {
         },
       ],
     })
+
+    return echartIns
   }
 
   _update(data)
   initChart = _update
+
+  return echartIns
 }
 
 async function refresh() {
   const data = await getData()
-  initChart(data)
+  const totalSeconds = getTotalSecons(data)
+  const title = `${i18n('browseTotalTime')}: ${convertSeconds(totalSeconds)}`
+  initChart(data).setOption({
+    title: {
+      text: title,
+    },
+  })
+}
+
+function getTotalSecons(data: DataItem[]): number {
+  return data.reduce(
+    (acc, cur) => {
+      return { seconds: acc.seconds + cur.seconds }
+    },
+    { seconds: 0 }
+  ).seconds
+}
+
+function convertSeconds(seconds: number) {
+  const day = Math.floor(seconds / 86400)
+  const hour = Math.floor((seconds % 86400) / 3600)
+  const min = Math.floor((seconds % 3600) / 60)
+  const sec = Math.floor(seconds % 60)
+  const dayStr = day > 0 ? `${day} ${i18n('day')} ` : ''
+  const hourStr = hour > 0 ? `${hour} ${i18n('hour')} ` : ''
+  const minStr = min > 0 ? `${min} ${i18n('minute')} ` : ''
+  const secStr = sec > 0 ? `${sec} ${i18n('second')} ` : ''
+  return `${dayStr}${hourStr}${minStr}${secStr}`
 }
 
 async function getData() {
@@ -235,9 +265,18 @@ function handleResetTimeRange() {
         </el-radio-group>
       </div>
 
-      <el-button class="m-r-10px" type="primary" @click="handleResetTimeRange">{{ i18n('refresh') }}</el-button>
-      <el-button type="primary" @click="handleLogStorage">{{ i18n('logInConsole') }}</el-button>
-      <el-button type="warning" @click="handleClearStorage">{{ i18n('clearHistory') }}</el-button>
+      <el-button
+        class="m-r-10px"
+        type="primary"
+        @click="handleResetTimeRange"
+        >{{ i18n('refresh') }}</el-button
+      >
+      <el-button type="primary" @click="handleLogStorage">{{
+        i18n('logInConsole')
+      }}</el-button>
+      <el-button type="warning" @click="handleClearStorage">{{
+        i18n('clearHistory')
+      }}</el-button>
     </div>
     <div class="chart" ref="chartDom"></div>
   </main>

@@ -89,5 +89,8 @@
   },
   "resetTimeRange": {
     "message": "重置时间区间"
+  },
+  "browseTotalTime": {
+    "message": "总共浏览时长"
   }
 }

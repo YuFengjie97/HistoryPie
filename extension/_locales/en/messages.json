@@ -89,5 +89,8 @@
   },
   "resetTimeRange": {
     "message": "reset time range"
+  },
+  "browseTotalTime": {
+    "message": "Browse Total Time"
   }
 }

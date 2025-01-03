@@ -8,7 +8,7 @@ import { execSync } from 'node:child_process'
  * Stub index.html to use Vite in development
  */
 async function stubIndexHtml() {
-  const views = ['popup', 'chart']
+  const views = ['chart']
 
   for (const view of views) {
     await fs.ensureDir(r(`extension/dist/${view}`))

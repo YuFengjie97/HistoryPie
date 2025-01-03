@@ -89,7 +89,7 @@ export function clearStorage() {
 }
 
 export function millisecondsToSeconds(milliseconds: number) {
-  return milliseconds / 1000;
+  return Math.round(milliseconds / 1000);
 }
 
 export function parseUrl(url: string): UrlInfo | null {

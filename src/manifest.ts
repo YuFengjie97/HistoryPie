@@ -31,7 +31,7 @@ export async function getMainfest() {
     background: {
       service_worker: "dist/background/index.mjs",
     },
-    permissions: ["tabs", "storage", "activeTab", "scripting"],
+    permissions: ["tabs", "storage", "activeTab"],
     web_accessible_resources: [
       {
         resources: ["dist/chart/index.html"],

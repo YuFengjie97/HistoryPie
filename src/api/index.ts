@@ -1,4 +1,4 @@
-import { TabLife, type TabLifePP } from "../background/utils";
+import { type TabLifePP } from "../background/utils";
 
 export interface Message {
   type: string,
@@ -28,4 +28,9 @@ export async function getTabLifeStorage() {
 
 export async function clearStorage() {
   return await sendMessage({ type: 'clearStorage' })
+}
+
+
+export async function backgroundLog() {
+  return await sendMessage({ type: 'backgroundLog' })
 }

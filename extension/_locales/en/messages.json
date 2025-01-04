@@ -92,5 +92,14 @@
   },
   "browseTotalTime": {
     "message": "Browse Total Time"
+  },
+  "onlyHttp": {
+    "message": "onlyHttp"
+  },
+  "timeRange": {
+    "message": "Time Range"
+  },
+  "protocol": {
+    "message": "protocal"
   }
 }

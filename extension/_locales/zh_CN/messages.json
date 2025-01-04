@@ -92,5 +92,14 @@
   },
   "browseTotalTime": {
     "message": "总共浏览时长"
+  },
+  "onlyHttp": {
+    "message": "只看Http协议"
+  },
+  "timeRange": {
+    "message": "时间区间"
+  },
+  "protocol": {
+    "message": "协议"
   }
 }

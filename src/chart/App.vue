@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
 import * as echarts from 'echarts'
-import { getTabLifeStorage, clearStorage } from '~/api'
+import { getTabLifeStorage, clearStorage, backgroundLog } from '~/api'
 import { i18n } from '~/utils/locales'
 import { type TabLifePP } from '~/background/utils'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -9,6 +9,7 @@ import dayjs from 'dayjs'
 import iconGithub from '~/assets/icon-github.svg'
 
 type ChartItemData = {
+  protocol: string
   hostname: string
   seconds: number
   lastTime: number
@@ -23,6 +24,8 @@ const now = new Date()
 const lastMonth = dayjs(now).subtract(1, 'month').toDate()
 const dateRange = ref([lastMonth, now])
 const showNum = ref<'all' | 'top10'>('top10')
+const totalTime = ref('')
+const showProtocol = ref<'all' | 'onlyHttp'>('onlyHttp')
 
 function timeFormat(secs: number) {
   // 小于一分钟
@@ -36,7 +39,7 @@ function timeFormat(secs: number) {
   return `${(secs / 60 / 60 / 24).toFixed(1)} ${i18n('day')}`
 }
 
-let initChart = function (data: ChartItemData[]): echarts.ECharts {
+let initChart = function (data: ChartItemData[]) {
   let echartIns = echarts.init(chartDom.value)
 
   function _update(data: ChartItemData[]) {
@@ -48,7 +51,7 @@ let initChart = function (data: ChartItemData[]): echarts.ECharts {
 
     echartIns.setOption({
       title: {
-        text: i18n('app_name'),
+        text: `${i18n('app_name')}`,
         left: 'center',
       },
       tooltip: {
@@ -91,25 +94,20 @@ let initChart = function (data: ChartItemData[]): echarts.ECharts {
         },
       ],
     })
-
-    return echartIns
   }
 
   _update(data)
   initChart = _update
-
-  return echartIns
 }
 
 async function refresh() {
   const data = await getData()
+  initChart(data)
+
   const totalSeconds = getTotalSecons(data)
-  const title = `${i18n('browseTotalTime')}: ${convertSeconds(totalSeconds)}`
-  initChart(data).setOption({
-    title: {
-      text: title,
-    },
-  })
+  totalTime.value = `${i18n('browseTotalTime')}: ${convertSeconds(
+    totalSeconds
+  )}`
 }
 
 function getTotalSecons(data: DataItem[]): number {
@@ -142,6 +140,9 @@ async function getData() {
   if (showNum.value === 'top10') {
     data = filterDataByTop10(data)
   }
+  if (showProtocol.value === 'onlyHttp') {
+    data = filterDataByProtocol(data)
+  }
   return data
 }
 
@@ -150,6 +151,7 @@ async function getStorageData(): Promise<DataItem[]> {
 
   return Object.keys(res).map((k) => ({
     hostname: k,
+    protocol: res[k][0].protocol,
     seconds: 0,
     lastTime: 0,
     list: res[k],
@@ -181,6 +183,10 @@ function filterDataByRange(data: DataItem[]): DataItem[] {
       list: filterList,
     }
   })
+}
+
+function filterDataByProtocol(data: DataItem[]): DataItem[] {
+  return data.filter((item) => ['http:', 'https:'].includes(item.protocol))
 }
 
 function sortDataBySeconds(data: DataItem[]): DataItem[] {
@@ -231,7 +237,11 @@ async function handleLogStorage() {
   console.log(res)
 }
 
-function handleRadioChange() {
+function handleRangeRadioChange() {
+  refresh()
+}
+
+function handleProtocolRadioChange() {
   refresh()
 }
 
@@ -243,50 +253,76 @@ function handleResetTimeRange() {
 }
 
 function goGithub() {
-  window.open('https://github.com/YuFengjie97/HistoryPie', '_blank');
+  window.open('https://github.com/YuFengjie97/HistoryPie', '_blank')
+}
+
+async function log() {
+  const { data } = await backgroundLog()
+  console.log(data)
 }
 </script>
 
 <template>
   <main class="p-y-10px p-x-40px relative">
-    <div class="absolute top-0 right-0 m-b-20px cursor-pointer" @click="goGithub">
-      <img class="w-32px h-32px":src="iconGithub" alt=""/>
+    <div
+      class="absolute top-0 right-0 m-b-20px cursor-pointer"
+      @click="goGithub"
+    >
+      <img class="w-32px h-32px" :src="iconGithub" alt="" />
     </div>
-    <div class="flex flex-wrap flex-items-center m-b-20px">
-      <div class="min-w-440px flex-grow-0">
-        <el-date-picker
-          v-model="dateRange"
-          type="datetimerange"
-          start-placeholder="Start date"
-          end-placeholder="End date"
-          format="YYYY-MM-DD HH:mm:ss"
-          date-format="YYYY/MM/DD ddd"
-          time-format="A hh:mm:ss"
-          @change="refresh"
-        />
-      </div>
+    <el-card>
+      <el-form label-width="auto" :inline="true">
+        <el-form-item :label="i18n('timeRange')">
+          <el-date-picker
+            v-model="dateRange"
+            type="datetimerange"
+            start-placeholder="Start date"
+            end-placeholder="End date"
+            format="YYYY-MM-DD HH:mm:ss"
+            date-format="YYYY/MM/DD ddd"
+            time-format="A hh:mm:ss"
+            @change="refresh"
+          />
+        </el-form-item>
 
-      <div class="flex-grow-0 m-r-10px">
-        <el-radio-group @change="handleRadioChange" v-model="showNum">
-          <el-radio value="all" size="large">{{ i18n('showAll') }}</el-radio>
-          <el-radio value="top10" size="large">{{ i18n('top10') }}</el-radio>
-        </el-radio-group>
-      </div>
+        <el-form-item :label="i18n('top10')">
+          <el-radio-group @change="handleRangeRadioChange" v-model="showNum">
+            <el-radio value="all">{{ i18n('showAll') }}</el-radio>
+            <el-radio value="top10">{{ i18n('top10') }}</el-radio>
+          </el-radio-group>
+        </el-form-item>
 
-      <el-button
-        class="m-r-10px"
-        type="primary"
-        @click="handleResetTimeRange"
-        >{{ i18n('refresh') }}</el-button
-      >
-      <el-button type="primary" @click="handleLogStorage">{{
-        i18n('logInConsole')
-      }}</el-button>
-      <el-button type="warning" @click="handleClearStorage">{{
-        i18n('clearHistory')
-      }}</el-button>
-    </div>
-    <div class="chart" ref="chartDom"></div>
+        <el-form-item :label="i18n('protocol')">
+          <el-radio-group
+            @change="handleProtocolRadioChange"
+            v-model="showProtocol"
+          >
+            <el-radio value="all">{{ i18n('showAll') }}</el-radio>
+            <el-radio value="onlyHttp">{{ i18n('onlyHttp') }}</el-radio>
+          </el-radio-group>
+        </el-form-item>
+
+        <el-form-item>
+          <el-button
+            class="m-r-10px"
+            type="primary"
+            @click="handleResetTimeRange"
+            >{{ i18n('refresh') }}</el-button
+          >
+          <el-button type="primary" @click="handleLogStorage"
+            >log storage</el-button
+          >
+          <el-button type="primary" @click="log">background log</el-button>
+          <el-button type="warning" @click="handleClearStorage">{{
+            i18n('clearHistory')
+          }}</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+    <h1>{{ totalTime }}</h1>
+    <el-card>
+      <div class="chart" ref="chartDom"></div>
+    </el-card>
   </main>
 </template>
 

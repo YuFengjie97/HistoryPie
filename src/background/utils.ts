@@ -10,32 +10,70 @@ export type TabLifePP = PublicProperties<TabLife>
 type UrlInfo = { protocol: string, hostname: string }
 
 export class TabLife {
-  hostname: string
+  protocol: string = ''
+  hostname: string = ''
   // 在一次访问中(处于当前正在活跃的标签页时)的起始时间和结束时间
-  enterTime: number
+  enterTime: number = 0
   leaveTime: number = 0
   seconds: number = 0
 
-  constructor(hostname: string) {
-    const now = new Date().getTime()
-    this.hostname = hostname
-    this.enterTime = now
+  constructor() {
+    this.onFocus()
   }
 
-  async handleLeave() {
+  async onTabRemove() {
     const now = new Date().getTime()
     this.leaveTime = now
-    const milliseconds = this.leaveTime - this.enterTime
-    this.seconds = millisecondsToSeconds(milliseconds)
 
     await this.updateStorage()
   }
 
+  async onTabUpdate() {
+    // old
+    const now = new Date().getTime()
+    if (this.hostname) {
+      this.leaveTime = now
+      await this.updateStorage()
+    }
+
+    // new
+    const urlInfo = await getUrlInfo()
+    if (!urlInfo) return
+
+    const { protocol,hostname } = urlInfo
+    this.protocol = protocol
+    this.hostname = hostname
+    this.enterTime = now
+  }
+
+  async onFocus() {
+    const hostInfo = await getUrlInfo()
+    if (!hostInfo) return
+    const { protocol,hostname } = hostInfo
+    this.protocol = protocol
+    this.hostname = hostname
+
+    const now = new Date().getTime()
+    this.enterTime = now
+  }
+
+  async onBlur() {
+    this.leaveTime = new Date().getTime()
+    await this.updateStorage()
+  }
+
+  calSeconds() {
+    this.seconds = millisecondsToSeconds(this.leaveTime - this.enterTime)
+  }
+
+
   async updateStorage() {
+    this.calSeconds()
     const list = await this.getStorageByHostname()
     console.log(this.hostname, this.seconds);
 
     list.push({
+      protocol: this.protocol,
       hostname: this.hostname,
       enterTime: this.enterTime,
       leaveTime: this.leaveTime,

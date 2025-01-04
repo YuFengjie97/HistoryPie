@@ -1,68 +1,48 @@
 import { clearStorage, getStorageAll, getUrlInfo, TabLife } from "./utils";
 import { type Message } from '~/api/index'
 
-export type TabLifeMap = {
-  [hostname in string]: TabLife
-}
+
+let tabLifeMap: {
+  [tabId in number]: TabLife
+} = {}
 
 
-let tabLifeActive: TabLife | null = null
+let tabActive: number | null = null
 
-/**
- * 在激活/更新tab,时,在当前tab/新tab跳转页面(跳转相同hostname/不同)
- */
-async function updateTabLife() {
-  // 旧地址更新
-  await tabLifeActive?.handleLeave()
-
-  // 新地址更新 / 创建
-  const urlInfo = await getUrlInfo()
-  if (urlInfo) {
-    const { protocol, hostname } = urlInfo
-    if (['http:', 'https:'].includes(protocol)) {
-      tabLifeActive = new TabLife(hostname)
-    }
-    else {
-      tabLifeActive = null
-    }
-  }
-
-}
-
-/**
- * 标签页激活
- * 触发条件:
- * 1. 新建空白页
- * 2. 从历史记录/url直接打开
- */
 chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   console.log('tab Active   ');
-  await updateTabLife()
+
+  if (tabActive && tabLifeMap[tabActive]) {
+    await tabLifeMap[tabActive].onBlur()
+  }
+
+  tabActive = tabId
+
+  if (!tabLifeMap[tabId]) {
+    tabLifeMap[tabId] = new TabLife()
+  } else {
+    await tabLifeMap[tabId].onFocus()
+  }
 });
 
 
-/**
- * 标签页移除
- * 触发条件:
- * 1. 使用关闭按钮关闭
- * 2. 关闭整个窗口(如果是关闭浏览器不会统计)
- * 3. 关闭其他tab也会触发
- */
 chrome.tabs.onRemoved.addListener(async (tabId) => {
   console.log('tab Remove  ');
-  await updateTabLife()
+
+  const tabLife = tabLifeMap[tabId]
+  tabActive = null
+  await tabLife.onTabRemove()
+  if(tabLifeMap[tabId]){
+    delete tabLifeMap[tabId]
+  }
 });
 
-/**
- * 更新:
- * 触发条件:
- * 通过修改地址栏,触发的在本标签页的跳转
- */
+
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete') {
     console.log('tab Update  ');
 
-    await updateTabLife()
+    await tabLifeMap[tabId].onTabUpdate()
   }
 });
 
@@ -79,6 +59,17 @@ chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse) =>
   if (message.type === "clearStorage") {
     clearStorage().then(res => {
       sendResponse({ data: "success" })
+    })
+    tabLifeMap = {}
+    tabActive = null
+  }
+
+  if(message.type === "backgroundLog") {
+    sendResponse({
+      data: {
+        tabActive,
+        tabLifeMap
+      }
     })
   }
 

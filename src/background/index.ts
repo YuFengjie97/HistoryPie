@@ -1,5 +1,5 @@
 import { clearStorage, getStorageAll, getUrlInfo, TabLife } from "./utils";
-import { type Message } from '../api/index'
+import { type Message } from '~/api/index'
 
 export type TabLifeMap = {
   [hostname in string]: TabLife
@@ -36,7 +36,7 @@ async function updateTabLife() {
  * 2. 从历史记录/url直接打开
  */
 chrome.tabs.onActivated.addListener(async ({ tabId }) => {
-  // console.log('tab Active   ');
+  console.log('tab Active   ');
   await updateTabLife()
 });
 
@@ -45,11 +45,12 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
  * 标签页移除
  * 触发条件:
  * 1. 使用关闭按钮关闭
- * 2. 关闭整个窗口
+ * 2. 关闭整个窗口(如果是关闭浏览器不会统计)
+ * 3. 关闭其他tab也会触发
  */
 chrome.tabs.onRemoved.addListener(async (tabId) => {
-  // console.log('tab Remove  ');
-  tabLifeActive?.handleLeave()
+  console.log('tab Remove  ');
+  await updateTabLife()
 });
 
 /**
@@ -59,7 +60,7 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
  */
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete') {
-    // console.log('tab Update  ');
+    console.log('tab Update  ');
 
     await updateTabLife()
   }

@@ -4,6 +4,9 @@
     "module": "ESNext",                                /* Specify what module code is generated. */
     "moduleResolution": "node",
     "jsx": "preserve",
+    "paths": {
+      "~/*": ["./src/*"]
+    },
     "jsxImportSource": "vue",
     "lib": ["DOM", "ESNext"],
     "allowSyntheticDefaultImports": true,

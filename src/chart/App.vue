@@ -1,11 +1,12 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
 import * as echarts from 'echarts'
-import { getTabLifeStorage, clearStorage } from '../api'
-import { i18n } from '../utils/locales'
-import { type TabLifePP } from '../background/utils'
+import { getTabLifeStorage, clearStorage } from '~/api'
+import { i18n } from '~/utils/locales'
+import { type TabLifePP } from '~/background/utils'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
+import iconGithub from '~/assets/icon-github.svg'
 
 type ChartItemData = {
   hostname: string
@@ -240,10 +241,17 @@ function handleResetTimeRange() {
   dateRange.value = [lastMonth, now]
   refresh()
 }
+
+function goGithub() {
+  window.open('https://github.com/YuFengjie97/HistoryPie', '_blank');
+}
 </script>
 
 <template>
-  <main class="p-10px">
+  <main class="p-y-10px p-x-40px relative">
+    <div class="absolute top-0 right-0 m-b-20px cursor-pointer" @click="goGithub">
+      <img class="w-32px h-32px":src="iconGithub" alt=""/>
+    </div>
     <div class="flex flex-wrap flex-items-center m-b-20px">
       <div class="min-w-440px flex-grow-0">
         <el-date-picker

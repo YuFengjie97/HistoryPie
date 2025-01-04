@@ -33,6 +33,7 @@ export class TabLife {
 
   async updateStorage() {
     const list = await this.getStorageByHostname()
+    console.log(this.hostname, this.seconds);
 
     list.push({
       hostname: this.hostname,
@@ -109,7 +110,7 @@ export function getUrlInfo(): Promise<UrlInfo | null> {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       let url = (tabs[0] && tabs[0].url) ?? ''
       const urlInfo = parseUrl(url)
-      
+
       resolve(urlInfo)
     });
   })

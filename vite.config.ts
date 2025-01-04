@@ -5,9 +5,15 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import UnoCSS from 'unocss/vite'
+import type { UserConfig } from 'vite'
 
-export const sharedConfig = {
+export const sharedConfig: UserConfig = {
   root: r("src"),
+  resolve: {
+    alias: {
+      '~/': `${r('src')}/`,
+    },
+  },
   plugins: [
     Vue(),
     AutoImport({

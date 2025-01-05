@@ -93,7 +93,7 @@ export class TabLife {
   }
 
   async setStorageByHostname(TabLifeList: TabLifePP[]) {
-    if(this.hostname) {
+    if (this.hostname) {
       await setStorageByKey(this.hostname, TabLifeList)
     }
   }

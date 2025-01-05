@@ -20,8 +20,9 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
 
   if (!tabLifeMap[tabId]) {
     tabLifeMap[tabId] = new TabLife()
-  } 
+  }
   await tabLifeMap[tabId].onFocus()
+
 });
 
 
@@ -32,7 +33,7 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
   const tabLife = tabLifeMap[tabId]
   tabActive = null
   await tabLife.onTabRemove()
-  if(tabLifeMap[tabId]){
+  if (tabLifeMap[tabId]) {
     delete tabLifeMap[tabId]
   }
 });
@@ -42,9 +43,10 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete') {
     console.log('tab Update  ');
 
-    if(tabLifeMap[tabId]){
+    if (tabLifeMap[tabId]) {
       await tabLifeMap[tabId].onTabUpdate()
     }
+
   }
 });
 
@@ -66,7 +68,7 @@ chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse) =>
     tabActive = null
   }
 
-  if(message.type === "backgroundLog") {
+  if (message.type === "backgroundLog") {
     sendResponse({
       data: {
         tabActive,

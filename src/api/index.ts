@@ -7,7 +7,7 @@ export interface Message {
 
 export type TabLifeStorage = { [k in string]: TabLifePP[] }
 
-function sendMessage<T>(message: Message): Promise<{ data: T }> {
+export function sendMessage<T>(message: Message): Promise<{ data: T }> {
   return new Promise((resolve, reject) => {
     chrome.runtime.sendMessage(message, (res: any) => {
       if (chrome.runtime.lastError) {

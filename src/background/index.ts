@@ -1,4 +1,4 @@
-import { clearStorage, getStorageAll, getUrlInfo, TabLife } from "./utils";
+import { clearStorage, getStorageAll, setStorageByKey, TabLife } from "./utils";
 import { type Message } from '~/api/index'
 
 
@@ -20,15 +20,15 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
 
   if (!tabLifeMap[tabId]) {
     tabLifeMap[tabId] = new TabLife()
-  } else {
-    await tabLifeMap[tabId].onFocus()
-  }
+  } 
+  await tabLifeMap[tabId].onFocus()
 });
 
 
 chrome.tabs.onRemoved.addListener(async (tabId) => {
   console.log('tab Remove  ');
 
+  if (tabId !== tabActive) return
   const tabLife = tabLifeMap[tabId]
   tabActive = null
   await tabLife.onTabRemove()
@@ -42,7 +42,9 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete') {
     console.log('tab Update  ');
 
-    await tabLifeMap[tabId].onTabUpdate()
+    if(tabLifeMap[tabId]){
+      await tabLifeMap[tabId].onTabUpdate()
+    }
   }
 });
 

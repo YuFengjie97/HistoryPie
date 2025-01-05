@@ -11,7 +11,7 @@ type UrlInfo = { protocol: string, hostname: string }
 
 export class TabLife {
   protocol: string = ''
-  hostname: string = ''
+  hostname: string | null = null
   // 在一次访问中(处于当前正在活跃的标签页时)的起始时间和结束时间
   enterTime: number = 0
   leaveTime: number = 0
@@ -40,7 +40,7 @@ export class TabLife {
     const urlInfo = await getUrlInfo()
     if (!urlInfo) return
 
-    const { protocol,hostname } = urlInfo
+    const { protocol, hostname } = urlInfo
     this.protocol = protocol
     this.hostname = hostname
     this.enterTime = now
@@ -49,7 +49,7 @@ export class TabLife {
   async onFocus() {
     const hostInfo = await getUrlInfo()
     if (!hostInfo) return
-    const { protocol,hostname } = hostInfo
+    const { protocol, hostname } = hostInfo
     this.protocol = protocol
     this.hostname = hostname
 
@@ -83,16 +83,23 @@ export class TabLife {
   }
 
   async getStorageByHostname(): Promise<TabLifePP[]> {
-    const list = await getStorageByKey<TabLifePP[]>(this.hostname)
-    return list === null ? [] : list
+    if (this.hostname) {
+      const list = await getStorageByKey<TabLifePP[]>(this.hostname)
+      return list === null ? [] : list
+    }
+    else {
+      return []
+    }
   }
 
   async setStorageByHostname(TabLifeList: TabLifePP[]) {
-    await setStorageByKey(this.hostname, TabLifeList)
+    if(this.hostname) {
+      await setStorageByKey(this.hostname, TabLifeList)
+    }
   }
 }
 
-function setStorageByKey<T>(key: string, val: T): Promise<void> {
+export function setStorageByKey<T>(key: string, val: T): Promise<void> {
   return new Promise((resolve, reject) => {
     chrome.storage.local.set({ [key]: val });
     resolve()

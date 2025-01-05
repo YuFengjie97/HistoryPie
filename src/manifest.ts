@@ -20,16 +20,17 @@ export async function getMainfest() {
       48: "assets/icon-pie.png",
       128: "assets/icon-pie.png"
     },
-    // content_scripts: [
-    //   {
-    //     js: ["dist/content/index.global.js"],
-    //     matches: [
-    //       "<all_urls>"
-    //     ]
-    //   }
-    // ],
+    content_scripts: [
+      {
+        js: ["dist/content/index.global.js"],
+        matches: [
+          "<all_urls>"
+        ]
+      }
+    ],
     background: {
       service_worker: "dist/background/index.mjs",
+      // persistent: true
     },
     permissions: ["tabs", "storage", "activeTab"],
     web_accessible_resources: [

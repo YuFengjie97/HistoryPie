@@ -1,3 +1,5 @@
+import { HostMap, StorageKey } from './tab'
+
 export * from './index'
 
 export type PublicProperties<T> = {
@@ -17,8 +19,14 @@ export class TabLife {
   leaveTime: number = 0
   seconds: number = 0
 
-  constructor() {
-    this.onFocus()
+  constructor(obj?: TabLifePP) {
+    if (obj) {
+      this.protocol = obj.protocol
+      this.hostname = obj.hostname
+      this.enterTime = obj.enterTime
+      this.leaveTime = obj.leaveTime
+      this.seconds = obj.seconds
+    }
   }
 
   async onTabRemove() {
@@ -66,10 +74,9 @@ export class TabLife {
     this.seconds = millisecondsToSeconds(this.leaveTime - this.enterTime)
   }
 
-
   async updateStorage() {
     this.calSeconds()
-    const list = await this.getStorageByHostname()
+    const list = await this.getStorageListByHostname()
     console.log(this.hostname, this.seconds);
 
     list.push({
@@ -79,34 +86,40 @@ export class TabLife {
       leaveTime: this.leaveTime,
       seconds: this.seconds
     })
-    await this.setStorageByHostname(list)
+    await this.setStorageListByHostname(list)
   }
 
-  async getStorageByHostname(): Promise<TabLifePP[]> {
+  async getStorageListByHostname(): Promise<TabLifePP[]> {
     if (this.hostname) {
-      const list = await getStorageByKey<TabLifePP[]>(this.hostname)
-      return list === null ? [] : list
+      const data = await getStorageByKey<HostMap>('hostMap')
+
+      if (!data) return []
+
+      return data[this.hostname] ?? []
     }
     else {
       return []
     }
   }
 
-  async setStorageByHostname(TabLifeList: TabLifePP[]) {
+  async setStorageListByHostname(TabLifeList: TabLifePP[]) {
     if (this.hostname) {
-      await setStorageByKey(this.hostname, TabLifeList)
+      const data = await getStorageByKey<HostMap>('hostMap') ?? {}
+      data[this.hostname] = TabLifeList
+
+      await setStorageByKey('hostMap', data)
     }
   }
 }
 
-export function setStorageByKey<T>(key: string, val: T): Promise<void> {
+export function setStorageByKey<T>(key: StorageKey, val: T): Promise<void> {
   return new Promise((resolve, reject) => {
     chrome.storage.local.set({ [key]: val });
     resolve()
   })
 }
 
-export function getStorageByKey<T>(key: string): Promise<T | null> {
+export function getStorageByKey<T>(key: StorageKey): Promise<T | null> {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get(key, (res) => {
       if (res[key] !== undefined) {
@@ -118,7 +131,7 @@ export function getStorageByKey<T>(key: string): Promise<T | null> {
   })
 }
 
-export function getStorageAll() {
+export function getStorageAll(): Promise<{ [k in string]: any }> {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get(null, (res) => {
       resolve(res)

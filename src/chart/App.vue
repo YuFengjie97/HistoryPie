@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
 import * as echarts from 'echarts'
-import { getTabLifeStorage, clearStorage, backgroundLog } from '~/api'
+import { getStorageAll, clearStorage, getHostMap } from '~/api'
 import { i18n } from '~/utils/locales'
 import { type TabLifePP } from '~/background/utils'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -147,7 +147,7 @@ async function getData() {
 }
 
 async function getStorageData(): Promise<DataItem[]> {
-  const res = await getTabLifeStorage()
+  const res = await getHostMap()
 
   return Object.keys(res).map((k) => ({
     hostname: k,
@@ -232,9 +232,8 @@ onMounted(async () => {
   refresh()
 })
 
-async function handleLogStorage() {
-  const res = await getTabLifeStorage()
-  console.log(res)
+async function handleLogBackgroundStorage() {
+  await getStorageAll()
 }
 
 function handleRangeRadioChange() {
@@ -256,10 +255,6 @@ function goGithub() {
   window.open('https://github.com/YuFengjie97/HistoryPie', '_blank')
 }
 
-async function log() {
-  const { data } = await backgroundLog()
-  console.log(data)
-}
 </script>
 
 <template>
@@ -309,10 +304,9 @@ async function log() {
             @click="handleResetTimeRange"
             >{{ i18n('refresh') }}</el-button
           >
-          <el-button type="primary" @click="handleLogStorage"
-            >log storage</el-button
+          <el-button type="primary" @click="handleLogBackgroundStorage"
+            >log background storage</el-button
           >
-          <el-button type="primary" @click="log">background log</el-button>
           <el-button type="warning" @click="handleClearStorage">{{
             i18n('clearHistory')
           }}</el-button>

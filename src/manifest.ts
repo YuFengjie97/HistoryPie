@@ -30,6 +30,7 @@ export async function getMainfest() {
     ],
     background: {
       service_worker: "dist/background/index.mjs",
+      type: 'module',
       // persistent: true
     },
     permissions: ["tabs", "storage", "activeTab"],

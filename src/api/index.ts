@@ -1,11 +1,5 @@
-import { type TabLifePP } from "../background/utils";
-
-export interface Message {
-  type: string,
-  preload?: any
-}
-
-export type TabLifeStorage = { [k in string]: TabLifePP[] }
+import { Message } from "~/background/event";
+import { type HostMap } from "~/background/tab";
 
 export function sendMessage<T>(message: Message): Promise<{ data: T }> {
   return new Promise((resolve, reject) => {
@@ -21,16 +15,16 @@ export function sendMessage<T>(message: Message): Promise<{ data: T }> {
   })
 }
 
-export async function getTabLifeStorage() {
-  const { data } = await sendMessage<TabLifeStorage>({ type: 'getStorage' })
-  return data
+export async function getHostMap(): Promise<HostMap> {
+  const { data } = await sendMessage<HostMap>({ type: 'getHostMap' })
+  return data ?? {}
 }
 
 export async function clearStorage() {
   return await sendMessage({ type: 'clearStorage' })
 }
 
-
-export async function backgroundLog() {
-  return await sendMessage({ type: 'backgroundLog' })
+export async function getStorageAll() {
+  const { data } = await sendMessage<any>({ type: "getStorageAll" })
+  return data
 }

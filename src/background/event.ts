@@ -12,7 +12,7 @@ export function registerCustomEvent() {
       getStorageByKey<HostMap>('hostMap').then(res => {
         console.log('getHostMap', res);
         
-        sendResponse({ data: res })
+        sendResponse(res)
       })
     }
 
@@ -20,7 +20,7 @@ export function registerCustomEvent() {
       clearStorage().then(res => {
         console.log('clear success');
         
-        sendResponse({ data: "success" })
+        sendResponse("success")
       })
     }
 
@@ -28,7 +28,7 @@ export function registerCustomEvent() {
       getStorageAll().then(res => {
         console.log('getStorageAll', res);
         
-        sendResponse({ data: res })
+        sendResponse(res)
       })
     }
 

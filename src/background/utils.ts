@@ -1,4 +1,6 @@
 import { HostMap, StorageKey } from './tab'
+import browser from "webextension-polyfill";
+
 
 export * from './index'
 
@@ -114,37 +116,27 @@ export class TabLife {
 
 export function setStorageByKey<T>(key: StorageKey, val: T): Promise<void> {
   return new Promise((resolve, reject) => {
-    chrome.storage.local.set({ [key]: val });
+    browser.storage.local.set({ [key]: val });
     resolve()
   })
 }
 
-export function getStorageByKey<T>(key: StorageKey): Promise<T | null> {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.get(key, (res) => {
-      if (res[key] !== undefined) {
-        resolve(res[key])
-      } else {
-        resolve(null)
-      }
-    });
-  })
+export async function getStorageByKey<T>(key: StorageKey): Promise<T | null> {
+  const res = await browser.storage.local.get(key)
+  if (res[key] !== undefined) {
+    return res[key] as T
+  } else {
+    return null
+  }
 }
 
-export function getStorageAll(): Promise<{ [k in string]: any }> {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.get(null, (res) => {
-      resolve(res)
-    })
-  })
+export async function getStorageAll(): Promise<{ [k in string]: any }> {
+  const res = await browser.storage.local.get(null)
+  return res
 }
 
 export function clearStorage() {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.clear(() => {
-      resolve('clear success')
-    });
-  })
+  browser.storage.local.clear()
 }
 
 export function millisecondsToSeconds(milliseconds: number) {
@@ -163,13 +155,10 @@ export function parseUrl(url: string): UrlInfo | null {
   }
 }
 
-export function getUrlInfo(): Promise<UrlInfo | null> {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      let url = (tabs[0] && tabs[0].url) ?? ''
-      const urlInfo = parseUrl(url)
+export async function getUrlInfo(): Promise<UrlInfo | null> {
+  const tabs = await browser.tabs.query({ active: true, currentWindow: true })
+  let url = (tabs[0] && tabs[0].url) ?? ''
+  const urlInfo = parseUrl(url)
 
-      resolve(urlInfo)
-    });
-  })
+  return urlInfo
 }

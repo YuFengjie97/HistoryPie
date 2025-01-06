@@ -1,4 +1,5 @@
 import { getStorageByKey, setStorageByKey, TabLife, TabLifePP } from "./utils"
+import browser from "webextension-polyfill";
 
 export type TabActive = number | null
 
@@ -64,7 +65,7 @@ async function setTabActive(val: TabActive) {
 }
 
 export function registerTabEvent() {
-  chrome.tabs.onActivated.addListener(async ({ tabId }) => {
+  browser.tabs.onActivated.addListener(async ({ tabId }) => {
     console.log('tab Active   ');
 
     let tabLifeMap = await getTabLifeMap()
@@ -89,7 +90,7 @@ export function registerTabEvent() {
   });
 
 
-  chrome.tabs.onRemoved.addListener(async (tabId) => {
+  browser.tabs.onRemoved.addListener(async (tabId) => {
     console.log('tab Remove  ');
 
     let tabLifeMap = await getTabLifeMap()
@@ -113,7 +114,7 @@ export function registerTabEvent() {
   });
 
 
-  chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     if (changeInfo.status === 'complete') {
       console.log('tab Update  ');
 
@@ -133,7 +134,7 @@ export function registerTabEvent() {
    * 为什么要这么做?
    * 全局变量已经持久化,并且浏览器关闭,虽然会触发onTabRemove,但是没有时间执行回调
    */
-  chrome.runtime.onStartup.addListener(() => {
+  browser.runtime.onStartup.addListener(() => {
     setTabActive(null)
     setTabLifeMap({})
   })

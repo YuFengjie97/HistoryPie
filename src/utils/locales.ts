@@ -1,3 +1,6 @@
+import browser from "webextension-polyfill"
+
+
 export function i18n(key: string) {
-  return chrome.i18n.getMessage(key)
+  return browser.i18n.getMessage(key)
 }

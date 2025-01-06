@@ -1,18 +1,10 @@
 import { Message } from "~/background/event";
 import { type HostMap } from "~/background/tab";
+import browser from "webextension-polyfill";
 
-export function sendMessage<T>(message: Message): Promise<T> {
-  return new Promise((resolve, reject) => {
-    chrome.runtime.sendMessage(message, (res: any) => {
-      if (chrome.runtime.lastError) {
-        console.error(`EORROR  ${message.type}`, chrome.runtime.lastError.message);
-        reject(new Error(chrome.runtime.lastError.message));
-      }
-      else {
-        resolve(res);
-      }
-    });
-  })
+export async function sendMessage<T>(message: Message): Promise<T> {
+  const res = await browser.runtime.sendMessage<Message, T>(message);
+  return res
 }
 
 export async function getHostMap(): Promise<HostMap> {

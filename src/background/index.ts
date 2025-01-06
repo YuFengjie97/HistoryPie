@@ -1,13 +1,14 @@
 import { registerCustomEvent } from "./event";
 import { registerTabEvent } from "./tab";
+import browser from "webextension-polyfill";
 
 
 registerCustomEvent()
 registerTabEvent()
 
 
-chrome.action.onClicked.addListener(() => {
-  const url = chrome.runtime.getURL(`dist/chart/index.html`);
-  chrome.tabs.create({ url }, (tab) => { });
+browser.action.onClicked.addListener(() => {
+  const url = browser.runtime.getURL(`dist/chart/index.html`);
+  browser.tabs.create({ url });
 })
 

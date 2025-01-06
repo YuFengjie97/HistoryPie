@@ -1,5 +1,6 @@
 import { clearStorage, getStorageAll, getStorageByKey } from "./utils";
 import { type HostMap } from "./tab";
+import browser from 'webextension-polyfill'
 
 export type Message = {
   type: "getHostMap" | "clearStorage" | "getStorageAll"
@@ -7,34 +8,26 @@ export type Message = {
 }
 
 export function registerCustomEvent() {
-  chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse) => {
-    if (message.type === "getHostMap") {
-      getStorageByKey<HostMap>('hostMap').then(res => {
-        console.log('getHostMap', res);
-        
-        sendResponse(res)
-      })
+  browser.runtime.onMessage.addListener(async (message) => {
+    
+    const msg = message as Message
+
+    if (msg.type === "getHostMap") {
+      const res = await getStorageByKey<HostMap>('hostMap')
+      console.log('getHostMap', res);
+      return res
     }
 
-    if (message.type === "clearStorage") {
-      clearStorage().then(res => {
-        console.log('clear success');
-        
-        sendResponse("success")
-      })
+    if (msg.type === "clearStorage") {
+      await clearStorage()
+      return 'success'
     }
 
-    if (message.type === "getStorageAll") {
-      getStorageAll().then(res => {
-        console.log('getStorageAll', res);
-        
-        sendResponse(res)
-      })
+    if (msg.type === "getStorageAll") {
+      const res = await getStorageAll()
+      return res
     }
-
-    return true
   });
-
 
 }
 

@@ -127,4 +127,10 @@ export function registerTabEvent() {
       await setTabLifeMap(tabLifeMap)
     }
   });
+
+  // 在开启浏览器时,重置全局变量
+  chrome.runtime.onStartup.addListener(() => {
+    setTabActive(null)
+    setTabLifeMap({})
+  })
 }

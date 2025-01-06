@@ -9,3 +9,7 @@ export function flatArray(arr: any[]) {
   }
   return res
 }
+
+export function millisecondsToSeconds(milliseconds: number) {
+  return Math.round(milliseconds / 1000);
+}

@@ -4,6 +4,7 @@ import * as echarts from 'echarts'
 import { getStorageAll, clearStorage, getHostMap } from '~/api'
 import { i18n } from '~/utils/locales'
 import { type TabLifePP } from '~/background/utils'
+import { millisecondsToSeconds } from '~/utils'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
 import iconGithub from '~/assets/icon-github.svg'
@@ -134,15 +135,16 @@ function convertSeconds(seconds: number) {
 async function getData() {
   let data = await getStorageData()
 
-  data = filterDataByRange(data)
-  data = sortDataBySeconds(data)
-
   if (showNum.value === 'top10') {
     data = filterDataByTop10(data)
   }
   if (showProtocol.value === 'onlyHttp') {
     data = filterDataByProtocol(data)
   }
+
+  data = filterDataByRange(data)
+  data = sortDataBySeconds(data)
+
   return data
 }
 
@@ -186,16 +188,39 @@ function filterDataByRange(data: DataItem[]): DataItem[] {
   })
 }
 
+function updateEdge(data: DataItem[]): DataItem[] {
+  const [s, e] = dateRange.value.map((item) => item.getTime())
+
+  return data.map((item) => {
+    let { list } = item
+    list = list.map((listItem) => {
+      let { enterTime, leaveTime } = listItem
+      enterTime = enterTime < s ? s : enterTime
+      leaveTime = leaveTime > e ? e : leaveTime
+      return {
+        ...listItem,
+        enterTime,
+        leaveTime,
+      }
+    })
+
+    return {
+      ...item,
+      list,
+    }
+  })
+}
+
 function filterDataByProtocol(data: DataItem[]): DataItem[] {
   return data.filter((item) => ['http:', 'https:'].includes(item.protocol))
 }
 
 function sortDataBySeconds(data: DataItem[]): DataItem[] {
-  return data
+  return updateEdge(data)
     .map((item) => {
       const { list } = item
       const seconds = list.reduce((acc, cur) => {
-        return acc + cur.seconds
+        return acc + millisecondsToSeconds(cur.leaveTime - cur.enterTime)
       }, 0)
       return {
         ...item,
@@ -246,9 +271,9 @@ function handleProtocolRadioChange() {
 }
 
 function handleResetTimeRange() {
-  const now = new Date()
-  const lastMonth = dayjs(now).subtract(1, 'month').toDate()
-  dateRange.value = [lastMonth, now]
+  // const now = new Date()
+  // const lastMonth = dayjs(now).subtract(1, 'month').toDate()
+  // dateRange.value = [lastMonth, now]
   refresh()
 }
 

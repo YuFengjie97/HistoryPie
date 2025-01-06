@@ -1,6 +1,6 @@
 import { HostMap, StorageKey } from './tab'
 import browser from "webextension-polyfill";
-
+import { millisecondsToSeconds } from '~/utils'
 
 export * from './index'
 
@@ -139,9 +139,6 @@ export function clearStorage() {
   browser.storage.local.clear()
 }
 
-export function millisecondsToSeconds(milliseconds: number) {
-  return Math.round(milliseconds / 1000);
-}
 
 export function parseUrl(url: string): UrlInfo | null {
   try {

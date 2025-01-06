@@ -128,7 +128,11 @@ export function registerTabEvent() {
     }
   });
 
-  // 在开启浏览器时,重置全局变量
+  /**
+   * 在开启浏览器时,重置全局变量
+   * 为什么要这么做?
+   * 全局变量已经持久化,并且浏览器关闭,虽然会触发onTabRemove,但是没有时间执行回调
+   */
   chrome.runtime.onStartup.addListener(() => {
     setTabActive(null)
     setTabLifeMap({})

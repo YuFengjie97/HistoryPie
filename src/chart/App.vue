@@ -159,18 +159,20 @@ async function getStorageData(): Promise<DataItem[]> {
 }
 
 function filterDataByRange(data: DataItem[]): DataItem[] {
-  const [s, e] = dateRange.value !== null ? dateRange.value : [lastMonth, now]
+  const [s, e] = dateRange.value.map((item) => item.getTime())
 
   return data.map((item) => {
     const { list } = item
-    let lastTime = 0
     const filterList = list.filter((tab) => {
-      const { leaveTime } = tab
+      const { enterTime, leaveTime } = tab
 
-      if (leaveTime >= s.getTime() && leaveTime <= e.getTime()) {
-        if (leaveTime > lastTime) {
-          lastTime = leaveTime
-        }
+      /**
+       * enterTime <= 筛选起始 && leaveTime <= 筛选结束
+       * enterTime >= 筛选起始 && leaveTime <= 筛选结束
+       * enterTime >= 筛选起始 && leaveTime >= 筛选结束
+       * enterTime <= 筛选起始 && leaveTime >= 筛选结束
+       */
+      if (enterTime <= e && leaveTime >= s) {
         return true
       }
 
@@ -179,7 +181,6 @@ function filterDataByRange(data: DataItem[]): DataItem[] {
 
     return {
       ...item,
-      lastTime,
       list: filterList,
     }
   })
@@ -254,7 +255,6 @@ function handleResetTimeRange() {
 function goGithub() {
   window.open('https://github.com/YuFengjie97/HistoryPie', '_blank')
 }
-
 </script>
 
 <template>

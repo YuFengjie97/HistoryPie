@@ -135,15 +135,17 @@ function convertSeconds(seconds: number) {
 async function getData() {
   let data = await getStorageData()
 
-  if (showNum.value === 'top10') {
-    data = filterDataByTop10(data)
-  }
+  
   if (showProtocol.value === 'onlyHttp') {
     data = filterDataByProtocol(data)
   }
 
   data = filterDataByRange(data)
   data = sortDataBySeconds(data)
+  
+  if (showNum.value === 'top10') {
+    data = filterDataByTop10(data)
+  }
 
   return data
 }

@@ -142,10 +142,12 @@ async function getData() {
 
   data = filterDataByRange(data)
   data = sortDataBySeconds(data)
-  
+
   if (showNum.value === 'top10') {
     data = filterDataByTop10(data)
   }
+
+  console.log(data);
 
   return data
 }
@@ -195,8 +197,14 @@ function updateEdge(data: DataItem[]): DataItem[] {
 
   return data.map((item) => {
     let { list } = item
+    let lastTime = 0
     list = list.map((listItem) => {
       let { enterTime, leaveTime } = listItem
+
+      // lastTime以真实leaveTime为主
+      lastTime = leaveTime > lastTime ? leaveTime : lastTime
+
+      // 以筛选时间段的起始-终止时间点更新
       enterTime = enterTime < s ? s : enterTime
       leaveTime = leaveTime > e ? e : leaveTime
       return {
@@ -208,6 +216,7 @@ function updateEdge(data: DataItem[]): DataItem[] {
 
     return {
       ...item,
+      lastTime,
       list,
     }
   })
@@ -221,9 +230,10 @@ function sortDataBySeconds(data: DataItem[]): DataItem[] {
   return updateEdge(data)
     .map((item) => {
       const { list } = item
-      const seconds = list.reduce((acc, cur) => {
-        return acc + millisecondsToSeconds(cur.leaveTime - cur.enterTime)
+      const milliseconds = list.reduce((acc, cur) => {
+        return acc + (cur.leaveTime - cur.enterTime)
       }, 0)
+      const seconds = Math.round(milliseconds / 1000)
       return {
         ...item,
         seconds,
